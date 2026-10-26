@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - عقار ميتر</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicons.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap");
+
+        :root {
+            --first-color: #591f74;
+            --second-color: #4c6449;
+            --first-gradient: linear-gradient(135deg, #591f74 0%, #7d2a9e 50%, #4c6449 100%);
+            --dark-gradient: linear-gradient(135deg, #120716 0%, #1e0f24 100%);
+            --card-bg: rgba(30, 15, 36, 0.45);
+            --card-border: rgba(125, 42, 158, 0.15);
+            --text-color: #f8f9fa;
+            --text-muted: #c3b8cb;
+            --body-font: "Arimo", sans-serif;
+            --success-color: #2ec4b6;
+        }
+
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            font-family: var(--body-font);
+            background: var(--dark-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        header {
+            background: rgba(18, 7, 22, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(125, 42, 158, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo i {
+            background: var(--first-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .btn-new-eval {
+            padding: 0.6rem 1.25rem;
+            background: var(--first-gradient);
+            border: none;
+            border-radius: 50px;
+            color: #fff;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(89, 31, 116, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-new-eval:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(89, 31, 116, 0.45);
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #ff6b6b;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: var(--body-font);
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .dashboard-wrapper {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .greeting {
+            margin-bottom: 2rem;
+        }
+
+        .greeting h1 {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .greeting p {
+            color: var(--text-muted);
+        }
+
+        /* Widgets Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-info h3 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-info .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            background: rgba(125, 42, 158, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: #c457f5;
+        }
+
+        .stat-card:nth-child(2) .stat-icon {
+            background: rgba(76, 100, 73, 0.2);
+            color: #7ab374;
+        }
+
+        .stat-card:nth-child(3) .stat-icon {
+            background: rgba(46, 196, 182, 0.15);
+            color: var(--success-color);
+        }
+
+        /* Table Section */
+        .history-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .history-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+        }
+
+        th {
+            padding: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.95rem;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge-type {
+            background: rgba(125, 42, 158, 0.2);
+            color: #d880fc;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-start;
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-family: var(--body-font);
+        }
+
+        .btn-action:hover {
+            background: var(--first-gradient);
+            border-color: transparent;
+            transform: translateY(-1px);
+        }
+
+        .btn-admin-nav {
+            background: rgba(46, 196, 182, 0.15);
+            border-color: rgba(46, 196, 182, 0.3);
+            color: #5cfce8;
+        }
+
+        .btn-admin-nav:hover {
+            background: var(--success-color);
+            color: #120716;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+            display: none;
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            color: rgba(255, 255, 255, 0.15);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .empty-state a {
+            margin-top: 1.5rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <a href="service3.html" class="logo">
+                <i class="ri-home-gear-line"></i>
+                <span>عقار ميتر</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="admin.html" id="adminBtn" class="btn-action btn-admin-nav" style="display: none;">
+                    <i class="ri-settings-4-line"></i>
+                    <span>لوحة الإدارة</span>
+                </a>
+                <span class="nav-user">
+                    <i class="ri-user-smile-line"></i>
+                    <span id="headerUsername">تحميل...</span>
+                </span>
+                <a href="service3.html" class="btn-new-eval">
+                    <i class="ri-add-line"></i>
+                    <span>تقييم عقار جديد</span>
+                </a>
+                <button onclick="logout()" class="btn-logout">تسجيل الخروج</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-wrapper">
+        <div class="greeting">
+            <h1 id="greetingName">مرحباً بك</h1>
+            <p>لوحة التحكم العقارية الخاصة بك لعرض عمليات التقييم بالذكاء الاصطناعي</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>إجمالي عمليات التقييم</h3>
+                    <div class="stat-value" id="statTotalValuations">0</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="ri-file-chart-line"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>متوسط أسعار التقييمات</h3>
+                    <div class="stat-value" id="statAveragePrice">SAR 0</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="ri-money-dollar-circle-line"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>أعلى تقييم مسجل</h3>
+                    <div class="stat-value" id="statHighestPrice">SAR 0</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="ri-line-chart-line"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="section-header">
+                <h2>سجل عمليات التقييم السابقة</h2>
+            </div>
+
+            <div class="empty-state" id="emptyState">
+                <i class="ri-folder-open-line"></i>
+                <p>لا يوجد لديك أي عمليات تقييم سابقة مسجلة حتى الآن.</p>
+                <a href="service3.html" class="btn-new-eval">ابدأ أول عملية تقييم الآن</a>
+            </div>
+
+            <div class="history-table-wrapper" id="tableWrapper">
+                <table id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>المدينة / الحي</th>
+                            <th>نوع العقار</th>
+                            <th>المساحة</th>
+                            <th>السعر المقدر</th>
+                            <th>الموثوقية</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        const username = localStorage.getItem('username');
+        const role = localStorage.getItem('role');
+
+        document.getElementById('headerUsername').textContent = username;
+        document.getElementById('greetingName').textContent = `مرحباً بك، ${username} 👋`;
+
+        // Display Admin button if admin
+        if (role === 'Admin') {
+            document.getElementById('adminBtn').style.display = 'inline-flex';
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Fetch history data
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('http://localhost:5000/api/predict/history?limit=50', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        logout();
+                    }
+                    throw new Error('فشل جلب بيانات السجل');
+                }
+
+                const data = await response.json();
+                console.log("History records:", data);
+
+                if (data.length === 0) {
+                    document.getElementById('tableWrapper').style.display = 'none';
+                    document.getElementById('emptyState').style.display = 'block';
+                    return;
+                }
+
+                // Update widgets stats
+                document.getElementById('statTotalValuations').textContent = data.length;
+                
+                const prices = data.map(x => x.predictedPrice);
+                const avgPrice = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+                const maxPrice = Math.max(...prices);
+
+                document.getElementById('statAveragePrice').textContent = `SAR ${avgPrice.toLocaleString()}`;
+                document.getElementById('statHighestPrice').textContent = `SAR ${maxPrice.toLocaleString()}`;
+
+                // Populate table
+                const tbody = document.getElementById('historyTableBody');
+                tbody.innerHTML = '';
+
+                data.forEach(item => {
+                    const date = new Date(item.timestamp).toLocaleDateString('ar-SA', {
+                        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+
+                    // Map types to Arabic
+                    let propTypeAr = item.propertyType;
+                    if (item.propertyType === 'Villa') propTypeAr = 'فيلا';
+                    else if (item.propertyType === 'Apartment') propTypeAr = 'شقة';
+                    else if (item.propertyType === 'Duplex') propTypeAr = 'دور';
+                    else if (item.propertyType === 'Land') propTypeAr = 'أرض';
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${date}</td>
+                        <td>${item.city} / ${item.district}</td>
+                        <td><span class="badge-type">${propTypeAr}</span></td>
+                        <td>${item.area.toLocaleString()} م²</td>
+                        <td style="font-weight: 600; color: #fff;">SAR ${Math.round(item.predictedPrice).toLocaleString()}</td>
+                        <td style="color: #2ec4b6; font-weight: 600;">${item.confidenceScore}%</td>
+                        <td class="actions-cell">
+                            <a href="service3.html?cachedId=${item.id}" class="btn-action">
+                                <i class="ri-eye-line"></i>
+                                عرض التقرير
+                            </a>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        window.onload = loadDashboardData;
+    </script>
+</body>
+</html>

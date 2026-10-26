@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - عقار ميتر</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicons.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap");
+
+        :root {
+            --first-color: #591f74;
+            --second-color: #4c6449;
+            --first-gradient: linear-gradient(135deg, #591f74 0%, #7d2a9e 50%, #4c6449 100%);
+            --dark-gradient: linear-gradient(135deg, #120716 0%, #1e0f24 100%);
+            --card-bg: rgba(30, 15, 36, 0.45);
+            --card-border: rgba(125, 42, 158, 0.15);
+            --text-color: #f8f9fa;
+            --text-muted: #c3b8cb;
+            --body-font: "Arimo", sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            font-family: var(--body-font);
+            background: var(--dark-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Decorative Background Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.35;
+        }
+
+        .orb-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--first-color);
+            top: -100px;
+            right: -100px;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--second-color);
+            bottom: -150px;
+            left: -150px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            backdrop-filter: blur(25px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            position: relative;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo i {
+            background: var(--first-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .auth-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            right: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 3rem 1rem 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-family: var(--body-font);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            border-color: #9d3fc5;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 10px rgba(125, 42, 158, 0.25);
+        }
+
+        .form-input:focus + i {
+            color: #9d3fc5;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fc8181;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-auth {
+            width: 100%;
+            padding: 1rem;
+            background: var(--first-gradient);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(89, 31, 116, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(89, 31, 116, 0.45);
+        }
+
+        .btn-auth:active {
+            transform: translateY(0);
+        }
+
+        .btn-auth:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .auth-footer a {
+            color: #b757e2;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .auth-footer a:hover {
+            color: #d28df4;
+            text-decoration: underline;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="auth-container">
+        <a href="service3.html" class="logo">
+            <i class="ri-home-gear-line"></i>
+            <span>عقار ميتر</span>
+        </a>
+
+        <div class="auth-header">
+            <h1>مرحباً بك مجدداً</h1>
+            <p>سجل دخولك للوصول إلى لوحة التقييم والتحليلات</p>
+        </div>
+
+        <div id="errorBox" class="error-message">
+            <i class="ri-error-warning-line"></i>
+            <span id="errorText">خطأ في البريد الإلكتروني أو كلمة المرور</span>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="usernameOrEmail" class="form-label">اسم المستخدم أو البريد الإلكتروني</label>
+                <div class="input-wrapper">
+                    <input type="text" id="usernameOrEmail" class="form-input" required placeholder="أدخل اسم المستخدم أو بريدك">
+                    <i class="ri-user-line"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">كلمة المرور</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" class="form-input" required placeholder="أدخل كلمة المرور الخاصة بك">
+                    <i class="ri-lock-line"></i>
+                </div>
+            </div>
+
+            <button type="submit" id="btnSubmit" class="btn-auth">
+                <span class="spinner" id="btnSpinner"></span>
+                <span id="btnText">تسجيل الدخول</span>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            ليس لديك حساب؟ <a href="signup.html">إنشاء حساب جديد</a>
+        </div>
+    </div>
+
+    <script>
+        // Redirect if already logged in
+        if (localStorage.getItem('token')) {
+            window.location.href = 'dashboard.html';
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        const errorBox = document.getElementById('errorBox');
+        const errorText = document.getElementById('errorText');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const btnText = document.getElementById('btnText');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Hide previous errors
+            errorBox.style.display = 'none';
+            
+            // Show loading
+            btnSubmit.disabled = true;
+            btnSpinner.style.display = 'block';
+            btnText.textContent = 'جاري التحقق...';
+
+            const payload = {
+                usernameOrEmail: document.getElementById('usernameOrEmail').value,
+                password: document.getElementById('password').value
+            };
+
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'اسم المستخدم أو كلمة المرور غير صحيحة');
+                }
+
+                const data = await response.json();
+                console.log("Login success:", data);
+
+                // Save data to localStorage
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('email', data.email);
+                localStorage.setItem('role', data.role);
+
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+
+            } catch (err) {
+                console.error(err);
+                errorBox.style.display = 'flex';
+                errorText.textContent = err.message;
+            } finally {
+                // Restore button state
+                btnSubmit.disabled = false;
+                btnSpinner.style.display = 'none';
+                btnText.textContent = 'تسجيل الدخول';
+            }
+        });
+    </script>
+</body>
+</html>

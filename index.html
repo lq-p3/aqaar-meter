@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+   <html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <script>
+         if (!localStorage.getItem('token')) {
+            window.location.href = 'login.html';
+         }
+      </script>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+      <!--=============== FAVICON ===============-->
+      <link rel="shortcut icon" href="assets/img/favicon.png" type="image/x-icon">
+
+      <!--=============== REMIXICONS ===============-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css">
+
+      <!--=============== SWIPER CSS ===============-->
+      <link rel="stylesheet" href="assets/css/swiper-bundle.min.css">
+
+      <!--=============== CSS ===============-->
+      <link rel="stylesheet" href="assets/css/styles.css">
+
+      <title>Aqaar Meter</title>
+   </head>
+   <body>
+      <!--==================== HEADER ====================-->
+      <header class="header" id="header">
+         <nav class="nav container">
+            <a href="#" class="nav__logo">
+               <img class="nav__logo-icon" src="assets/img/Aqaarlogo.png" alt="logo">
+             </a>
+
+            <div class="nav__menu" id="nav-menu">
+               <ul class="nav__list">
+                  <li>
+                     <a href="#home" class="nav__link active-link">Home</a>
+                  </li>
+
+                  <li>
+                     <a href="#about" class="nav__link">About Us</a>
+                  </li>
+
+                <!--   <li>
+                     <a href="#services" class="nav__link">Services</a>
+                  </li>
+--> 
+                  <li>
+                     <a href="#projects" class="nav__link">Tech</a>
+                  </li>
+
+                  <li>
+                     <a href="service3.html" class="nav__link button">Our Service</a>
+                  </li>
+               </ul>
+
+               <!-- Close button -->
+               <div class="nav__close" id="nav-close">
+                  <i class="ri-close-large-line"></i>
+               </div>
+            </div>
+
+            <!-- Toggle menu -->
+            <div class="nav__toggle" id="nav-toggle">
+               <i class="ri-apps-2-line"></i>
+            </div>
+         </nav>
+      </header>
+
+      <!--==================== MAIN ====================-->
+      <main class="main">
+         <!--==================== HOME ====================-->
+         <section class="home section" id="home">
+            <img src="assets/img/home-lines-bg.svg" alt="image" class="home__lines">
+            
+            <div class="home__container container grid">
+               <div class="home__content grid">
+                  <div class="home__data">
+                     <h1 class="home__title">
+                       Accurate Insights,Smarter Investments
+                      
+                     </h1>
+   
+
+                     <p class="home__description">
+                        with Aqaar meter
+                     </p>
+   
+                     <div class="home__buttons">
+                        <a href="service3.html" class="button">Our Service</a>
+   
+                        <a href="#projects" class="button__link">
+                           <span>View tech</span>
+                           <i class="ri-arrow-right-line"></i>
+                        </a>
+                     </div>
+                  </div>
+
+                  <div class="home__info">
+                     
+
+                     <div>
+                           
+                        <h3 class="home__info-title">92%</h3>
+                        <p class="home__info-description">Accuracy ratio</p>
+                     </div>
+                      
+                  </div>
+               </div>
+
+               <div class="home__images">
+                  <img src="assets/img/house3.jpg" alt="image" class="home__img-1">
+                  <img src="assets/img/house.jpg" alt="image" class="home__img-2">
+               </div>
+            </div>
+         </section>
+
+         <!--==================== ABOUT ====================-->
+         <section class="about section" id="about">
+            <div class="about__container container grid">
+               <div class="about__data">
+                  <span class="section__subtitle">ABOUT US</span>
+                  <h2 class="section__title">
+                     We Provide The Best <br> Real Estate Valuation Services
+                  </h2>
+
+                  <p class="about__description">
+                 We empower the real estate sector through artificial intelligence, not by replacing human expertise, 
+                 but by enhancing it.Our platform combines innovation, data intelligence, and advanced geospatial analysis to deliver accurate, transparent, and real time property valuations.We’re driven by a vision to build trust, 
+                 speed up decision making, and create fair pricing across Saudi Arabia’s evolving real estate market.
+
+                  </p>
+
+                  <ul class="about__list grid">
+                     <li class="about__list-item">
+                        <i class="ri-checkbox-circle-line"></i>
+                        <span>Precision-Driven Models</span>
+                     </li>
+
+                     <li class="about__list-item">
+                        <i class="ri-checkbox-circle-line"></i>
+                        <span>Location Intelligence & Mapping</span>
+                     </li>
+
+                     <li class="about__list-item">
+                        <i class="ri-checkbox-circle-line"></i>
+                        <span>Predictive Market Forecasting</span>
+                     </li>
+
+                     <li class="about__list-item">
+                        <i class="ri-checkbox-circle-line"></i>
+                        <span>Real-Time Data Intelligence</span>
+                     </li>
+                  </ul>
+
+                  <!--
+                  <a href="#projects" class="button">View Projects</a>
+
+                   -->
+               </div>
+
+               <div class="about__images">
+                  <img src="assets/img/main5.jpg" alt="image" class="about__img-1">
+                  <img src="assets/img/main4.jpg" alt="image" class="about__img-2">
+               </div>
+            </div>
+         </section>
+
+
+                  <!--==================== SERVICES ====================
+
+         
+         <section class="services section" id="services">
+            <div class="services__container container grid">
+               <div class="services__data">
+                  <div>
+                     <span class="section__subtitle">OUR SERVICES</span>
+                     <h2 class="section__title">
+                        High Quality <br> Construction Services
+                     </h2>
+                  </div>
+
+                  <p class="services__description">
+                     We provide multiple services for you, offering 
+                     confidence and security in construction.
+                  </p>
+
+                  <a href="#contact" class="button">Contact Now</a>
+               </div>
+
+               <div class="services__swiper swiper">
+                  <div class="swiper-wrapper">
+                     <article class="services__card swiper-slide">
+                        <div class="services__icon">
+                           <i class="ri-building-line"></i>
+                        </div>
+
+                        <h3 class="services__title">Housing <br> Construction</h3>
+
+                        <p>
+                           We build with the best professionals 
+                           and high-quality work for a safe and 
+                           effective home.
+                        </p>
+                     </article>
+
+                     <article class="services__card swiper-slide">
+                        <div class="services__icon">
+                           <i class="ri-home-office-line"></i>
+                        </div>
+
+                        <h3 class="services__title">Construction Of <br> Home Areas</h3>
+
+                        <p>
+                           We build with the best professionals 
+                           and high-quality work for a safe and 
+                           effective home.
+                        </p>
+                     </article>
+
+                     <article class="services__card swiper-slide">
+                        <div class="services__icon">
+                           <i class="ri-tools-line"></i>
+                        </div>
+
+                        <h3 class="services__title">Maintenance & <br> Repair</h3>
+
+                        <p>
+                           We build with the best professionals 
+                           and high-quality work for a safe and 
+                           effective home.
+                        </p>
+                     </article>
+
+                     <article class="services__card swiper-slide">
+                        <div class="services__icon">
+                           <i class="ri-box-3-line"></i>
+                        </div>
+
+                        <h3 class="services__title">Installation Of <br> ceramics & Others</h3>
+
+                        <p>
+                           We build with the best professionals 
+                           and high-quality work for a safe and 
+                           effective home.
+                        </p>
+                     </article>
+
+                     <article class="services__card swiper-slide">
+                        <div class="services__icon">
+                           <i class="ri-drop-line"></i>
+                        </div>
+
+                        <h3 class="services__title">Water & Drainage <br> Installation</h3>
+
+                        <p>
+                           We build with the best professionals 
+                           and high-quality work for a safe and 
+                           effective home.
+                        </p>
+                     </article>
+                  </div>
+               </div>
+
+                <div class="swiper-button-prev">
+                  <i class="ri-arrow-left-line"></i>
+               </div>
+
+               <div class="swiper-button-next">
+                  <i class="ri-arrow-right-line"></i>
+               </div>
+            </div>
+
+            <div class="services__shape"></div>
+         </section>
+
+         -->
+
+         <!--==================== PROJECTS ====================-->
+         <section class="projects section" id="projects">
+            <span class="section__subtitle">Our Tech</span>
+            <h2 class="section__title">Techenologies <br> Used</h2>
+
+            <div class="projects__container container grid">
+               <article class="projects__card">
+                  <img src="assets/img/tech11.jpg" alt="image" class="projects__img">
+
+                  <div class="projects__data">
+                     <h2 class="projects__title">Artificial Intelligence</h2>
+
+                     <p>
+                       Used to build predictive models that analyze property data, detect pricing patterns, and enhance valuation accuracy over time.
+                     </p>
+                  </div>
+               </article>
+
+               <article class="projects__card">
+                  <img src="assets/img/tech2.jpg" alt="image" class="projects__img">
+
+                  <div class="projects__data">
+                     <h2 class="projects__title">Geospatial Analytics (GIS)</h2>
+
+                     <p>
+                       Integrates mapping and spatial data to visualize market trends, location performance, and neighborhood insights with high precision.
+                     </p>
+                  </div>
+               </article>
+
+               <article class="projects__card">
+                  <img src="assets/img/tech3.jpg" alt="image" class="projects__img">
+
+                  <div class="projects__data">
+                     <h2 class="projects__title">Data Visualization</h2>
+
+                     <p>
+                       Interactive dashboards and visual analytics translate complex data into clear, intuitive insights for all users.
+                     </p>
+                  </div>
+               </article>
+            </div>
+         </section>
+
+         <!--==================== CONTACT ====================
+         <section class="contact section" id="contact">
+            <div class="container">
+               <span class="section__subtitle">CONTACT ME</span>
+               <h2 class="section__title">Write To Us & Build</h2>
+
+               <div class="contact__container grid">
+                  <img src="assets/img/contact-img.png" alt="image" class="contact__img">
+
+                  <div class="contact__data grid">
+                     <div class="contact__card">
+                        <div class="contact__icon">
+                           <i class="ri-map-pin-2-line"></i>
+                        </div>
+   
+                        <h3 class="contact__title">I'm here</h3>
+                        <address class="contact__info">
+                           Peru - Lima <br>
+                           Av.Moon #321
+                        </address>
+                     </div>
+   
+                     <div class="contact__card">
+                        <div class="contact__icon">
+                           <i class="ri-phone-line"></i>
+                        </div>
+   
+                        <h3 class="contact__title">Talk to me</h3>
+                        <address class="contact__info">
+                           +00-987-7654-321 <br>
+                           +11-012345
+                        </address>
+                     </div>
+   
+                     <div class="contact__card">
+                        <div class="contact__icon">
+                           <i class="ri-message-3-line"></i>
+                        </div>
+   
+                        <h3 class="contact__title">Chat with me</h3>
+                        
+                        <div class="contact__social">
+                           <a href="https://api.whatsapp.com/send?phone=51123456789&text=Hello, more information!" target="_blank" class="contact__social-link">
+                              <i class="ri-whatsapp-line"></i>
+                           </a>
+   
+                           <a href="https://m.me/bedimcode" target="_blank" class="contact__social-link">
+                              <i class="ri-messenger-line"></i>
+                           </a>
+                           
+                           <a href="https://t.me/telegram" target="_blank" class="contact__social-link">
+                              <i class="ri-telegram-line"></i>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </section>
+         -->
+      </main>
+      <!--==================== FOOTER ====================-->
+      <footer class="footer">
+         <div class="footer__container container grid">
+            <div>
+               <a href="#" class="footer__logo">
+               <img class="footer__logo-icon" src="assets/img/footerlogo.png" alt="logo">
+               </a>
+
+
+               <p class="footer__description">Smart Real Estate Appraisal   <br>    Merging Accuracy,
+                       Speed, and Expertise.</p>
+
+               <address class="footer__email">Aqarmeter@hotmail.com</address>
+            </div>
+
+            <div class="footer__content grid">
+               <div>
+                  <h3 class="footer__title">Company</h3>
+
+                  <ul class="footer__links">
+
+                      <li>
+                        <a href="#home" class="footer__link">Home</a>
+                     </li>
+                     <li>
+                        <a href="#about" class="footer__link">About Us</a>
+                     </li>
+
+                     <!--  
+                     <li>
+                        <a href="#services" class="footer__link">Services</a>
+                     </li>
+                     -->
+                     <li>
+                        <a href="#projects" class="footer__link">Tech</a>
+                     </li>
+                  </ul>
+               </div>
+
+               <div>
+                  <h3 class="footer__title">Information</h3>
+
+                  <ul class="footer__list">
+                     <li>
+                        <address class="footer__info">Saudi Arabia - Riyadh</address>
+
+                     <li>
+                        <address class="footer__info">9AM - 5PM</address>
+                     </li>
+                  </ul>
+               </div>
+
+               <div>
+                  <h3 class="footer__title">Social Media</h3>
+
+                  <div class="footer__social">
+                    <a href="https://www.linkedin.com/in/%D8%B9%D9%82%D8%A7%D8%B1-%D9%85%D9%8A%D8%AA%D8%B1-756167391?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" target="_blank" class="footer__social-link">
+  <i class="ri-linkedin-box-line"></i>
+</a>
+
+
+                     <a href="https://x.com/aqarmeterksa?s=11&t=J3D_tGNQ2krbuGypqv3wAw" target="_blank" class="footer__social-link">
+                        <i class="ri-twitter-x-fill"></i>
+                     </a>
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <span class="footer__copy">
+            &#169; All Rights Reserved By Aqaar Meter.
+         </span>
+      </footer>
+
+      <!--========== SCROLL UP ==========-->
+      <a href="#" class="scrollup" id="scroll-up">
+         <i class="ri-arrow-up-line"></i>
+      </a>
+
+      <!--=============== SCROLLREVEAL ===============-->
+      <script src="assets/js/scrollreveal.min.js"></script>
+
+      <!--=============== SWIPER JS ===============-->
+      <script src="assets/js/swiper-bundle.min.js"></script>
+
+      <!--=============== MAIN JS ===============-->
+      <script src="assets/js/main.js"></script>
+   </body>
+</html>

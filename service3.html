@@ -1,0 +1,2800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script>
+        if (!localStorage.getItem('token')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Valuation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicons.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap");
+
+        :root {
+            --first-color: #591f74;
+            --second-color: #4c6449;
+            --first-gradient: linear-gradient(135deg, #591f74 0%, #7d2a9e 50%, #4c6449 100%);
+            --dark-gradient: linear-gradient(135deg, #1a0b1f 0%, #2d1b35 100%);
+            --title-color: hsl(255, 12%, 12%);
+            --text-color: hsl(225, 12%, 24%);
+            --text-color-light: hsl(255, 4%, 70%);
+            --body-color: #f8f9fa;
+            --container-color: hsl(0, 0%, 100%);
+            --white-color: hsl(0, 0%, 100%);
+            --black-color: hsl(255, 20%, 10%);
+            --gray-border: hsl(255, 6%, 90%);
+            --body-font: "Arimo", sans-serif;
+            --big-font-size: 2.25rem;
+            --h1-font-size: 1.5rem;
+            --h2-font-size: 1.25rem;
+            --h3-font-size: 1rem;
+            --normal-font-size: .938rem;
+            --small-font-size: .813rem;
+            --font-regular: 400;
+            --font-medium: 500;
+            --font-semi-bold: 600;
+            --font-bold: 700;
+        }
+
+        @media screen and (min-width: 1150px) {
+            :root {
+                --big-font-size: 3.5rem;
+                --h1-font-size: 2.25rem;
+                --h2-font-size: 1.5rem;
+                --h3-font-size: 1.25rem;
+                --normal-font-size: 1rem;
+                --small-font-size: .875rem;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--body-font);
+            font-size: var(--normal-font-size);
+            background: var(--body-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Progress Steps - FIX #1: Equal size and centered text */
+        .progress-section {
+            background: var(--container-color);
+            padding: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .progress-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--body-color);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            min-width: 180px;
+            height: 60px;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .progress-step.active {
+            background: var(--first-gradient);
+            color: var(--white-color);
+            box-shadow: 0 5px 20px rgba(89, 31, 116, 0.3);
+        }
+
+        .progress-step.completed {
+            background: var(--second-color);
+            color: var(--white-color);
+        }
+
+        .progress-step-number {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-bold);
+        }
+
+        .progress-step.active .progress-step-number,
+        .progress-step.completed .progress-step-number {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-step-text {
+            font-weight: var(--font-semi-bold);
+            font-size: var(--small-font-size);
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        /* Form Sections */
+        .form-container {
+            padding: 4rem 0;
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-card {
+            background: var(--container-color);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .form-icon {
+display: none;
+        }
+
+        .form-icon i {
+            font-size: 2.5rem;
+            color: var(--white-color);
+        }
+
+        .form-header h2 {
+            font-size: var(--h1-font-size);
+            font-weight: var(--font-bold);
+            color: var(--title-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header p {
+            color: var(--text-color-light);
+            font-size: var(--normal-font-size);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: var(--font-semi-bold);
+            color: var(--title-color);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group label i {
+            color: var(--first-color);
+            font-size: 1rem;
+        }
+
+        .form-group select,
+        .form-group input {
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--gray-border);
+            border-radius: 12px;
+            font-family: var(--body-font);
+            font-size: var(--normal-font-size);
+            transition: all 0.3s ease;
+            background: var(--white-color);
+            color: var(--text-color);
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--first-color);
+            box-shadow: 0 0 0 4px rgba(89, 31, 116, 0.1);
+        }
+
+        /* Upload Area */
+        .upload-section {
+            margin-bottom: 2rem;
+        }
+
+        .upload-area {
+            border: 3px dashed var(--gray-border);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: linear-gradient(135deg, rgba(89, 31, 116, 0.02) 0%, rgba(76, 100, 73, 0.02) 100%);
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--first-color);
+            background: linear-gradient(135deg, rgba(89, 31, 116, 0.08) 0%, rgba(76, 100, 73, 0.08) 100%);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+           display: none;
+        }
+
+        .upload-icon i {
+            font-size: 2rem;
+            color: var(--white-color);
+        }
+
+        .upload-area h3 {
+            font-size: var(--h3-font-size);
+            color: var(--title-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-area p {
+            color: var(--text-color-light);
+            font-size: var(--small-font-size);
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            border: 3px solid var(--gray-border);
+            transition: all 0.3s ease;
+        }
+
+        .preview-item:hover {
+            border-color: var(--first-color);
+            transform: scale(1.05);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--white-color);
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .preview-item button:hover {
+            background: var(--first-color);
+            transform: scale(1.1);
+        }
+
+        /* Map Section - FIX #4: Fixed background map */
+        #map {
+            height: 500px;
+            border-radius: 20px;
+            border: 3px solid var(--gray-border);
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .map-info {
+            background: linear-gradient(135deg, rgba(89, 31, 116, 0.1) 0%, rgba(76, 100, 73, 0.1) 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 2px solid var(--gray-border);
+            position: relative;
+            z-index: 2;
+        }
+
+        .map-info-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .map-info-item i {
+            font-size: 1.5rem;
+            color: var(--first-color);
+        }
+
+        .map-info-item p {
+            color: var(--text-color);
+            font-weight: var(--font-medium);
+        }
+
+        /* Buttons - FIX #3: Side by side on mobile */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1.25rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-family: var(--body-font);
+            font-size: var(--normal-font-size);
+            font-weight: var(--font-bold);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            min-width: 200px;
+        }
+
+        .button-primary {
+            background: var(--first-gradient);
+            color: var(--white-color);
+        }
+
+        .button-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(89, 31, 116, 0.4);
+        }
+
+        .button-secondary {
+            background: var(--container-color);
+            color: var(--text-color);
+            border: 2px solid var(--gray-border);
+        }
+
+        .button-secondary:hover {
+            background: var(--body-color);
+            transform: translateY(-3px);
+        }
+
+        /* Report Section */
+        .report-hero {
+            background: var(--first-gradient);
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--white-color);
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            box-shadow: 0 15px 50px rgba(89, 31, 116, 0.3);
+        }
+
+        .report-hero h2 {
+            font-size: var(--h1-font-size);
+            margin-bottom: 1rem;
+        }
+
+        .report-price {
+            font-size: 4rem;
+            font-weight: var(--font-bold);
+            margin: 2rem 0;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Spatial Analysis Section */
+        .spatial-analysis-section {
+            background: var(--container-color);
+            padding: 3rem;
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        .spatial-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .spatial-header h3 {
+            font-size: var(--h2-font-size);
+            color: var(--title-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .spatial-header h3 i {
+            color: var(--first-color);
+            font-size: 1.75rem;
+        }
+
+        .spatial-header p {
+            color: var(--text-color-light);
+        }
+
+        #reportMap {
+            height: 600px;
+            border-radius: 20px;
+            border: 3px solid var(--gray-border);
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            position: relative;
+             z-index: 1;
+            overflow: hidden;
+        }
+
+        /* FIX #5: Wider legend */
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: 2px solid var(--gray-border);
+            box-shadow: 0 3px 15px rgba(0,0,0,0.2);
+            min-width: 280px;
+            backdrop-filter: blur(10px);
+        }
+
+        .legend-title {
+            font-size: var(--normal-font-size);
+            font-weight: var(--font-bold);
+            color: var(--title-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-title i {
+            color: var(--first-color);
+            font-size: 1.2rem;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--gray-border);
+            flex-shrink: 0;
+        }
+
+        .legend-color.high-density {
+            background: #ff4757;
+        }
+
+        .legend-color.medium-density {
+            background: #ffa502;
+        }
+
+        .legend-color.low-density {
+            background: #26de81;
+        }
+
+        .legend-color.property {
+            background: var(--first-color);
+        }
+
+        .legend-text {
+            font-size: var(--small-font-size);
+            color: var(--text-color);
+            font-weight: var(--font-medium);
+        }
+
+        /* FIX #6: Side by side nearby areas on mobile */
+        .nearby-areas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .nearby-card {
+            background: var(--container-color);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 2px solid var(--gray-border);
+            transition: all 0.3s ease;
+        }
+
+        .nearby-card:hover {
+            border-color: var(--first-color);
+            transform: translateY(-5px);
+        }
+
+        .nearby-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .nearby-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--first-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nearby-icon i {
+            font-size: 1.25rem;
+            color: var(--white-color);
+        }
+
+        .nearby-card h4 {
+            font-size: var(--normal-font-size);
+            color: var(--title-color);
+            font-weight: var(--font-bold);
+        }
+
+        .nearby-distance {
+            font-size: var(--small-font-size);
+            color: var(--text-color-light);
+        }
+
+        .nearby-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: var(--small-font-size);
+            font-weight: var(--font-semi-bold);
+            margin-top: 0.5rem;
+        }
+
+        .nearby-status.excellent {
+            background: rgba(38, 222, 129, 0.2);
+            color: #26de81;
+        }
+
+        .nearby-status.good {
+            background: rgba(255, 165, 2, 0.2);
+            color: #ffa502;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .report-card {
+            background: var(--container-color);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .report-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+        }
+
+        .report-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .report-card-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--first-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .report-card-icon i {
+            font-size: 1.75rem;
+            color: var(--white-color);
+        }
+
+        .report-card h3 {
+            font-size: var(--h2-font-size);
+            color: var(--title-color);
+            font-weight: var(--font-bold);
+        }
+
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 2px solid var(--body-color);
+            gap: 1rem;
+        }
+
+        .report-item:last-child {
+            border-bottom: none;
+        }
+
+        .report-item-label {
+            color: var(--text-color-light);
+            font-weight: var(--font-medium);
+        }
+
+        .report-item-value {
+            font-weight: var(--font-bold);
+            color: var(--title-color);
+            text-align: right;
+        }
+
+        /* FIX #2: Visible and centered loading */
+        .loading {
+            text-align: center;
+            padding: 6rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .loading-spinner {
+            width: 120px;
+            height: 120px;
+            background: var(--first-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: pulse 1.5s ease-in-out infinite;
+            box-shadow: 0 10px 40px rgba(89, 31, 116, 0.4);
+        }
+
+        .loading-spinner i {
+            font-size: 4rem;
+            color: var(--white-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                opacity: 1; 
+                box-shadow: 0 10px 40px rgba(89, 31, 116, 0.4);
+            }
+            50% { 
+                transform: scale(1.1); 
+                opacity: 0.9;
+                box-shadow: 0 15px 60px rgba(89, 31, 116, 0.6);
+            }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading h3 {
+            font-size: var(--h2-font-size);
+            color: var(--title-color);
+            margin-bottom: 0.5rem;
+            font-weight: var(--font-bold);
+        }
+
+        .loading p {
+            color: var(--text-color-light);
+            font-size: var(--normal-font-size);
+        }
+
+        /* Leaflet Custom Styles */
+        .density-marker {
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 15px;
+            padding: 5px;
+        }
+
+        .popup-content {
+            padding: 0.5rem;
+        }
+
+        .popup-content h4 {
+            font-size: var(--normal-font-size);
+            color: var(--title-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .popup-content p {
+            font-size: var(--small-font-size);
+            color: var(--text-color-light);
+            margin: 0.25rem 0;
+        }
+
+        /* Responsive */
+        @media screen and (max-width: 768px) {
+            .progress-wrapper {
+                gap: 0.5rem;
+            }
+
+            .progress-step {
+                padding: 0.5rem 1rem;
+                font-size: var(--small-font-size);
+                min-width: 140px;
+                height: 55px;
+            }
+
+            .progress-step-text {
+                font-size: 0.7rem;
+            }
+
+            .form-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #map, #reportMap {
+                height: 350px;
+            }
+
+            /* FIX #3: Buttons side by side on mobile, smaller size */
+            .button-group {
+                gap: 0.75rem;
+            }
+
+            .button {
+                padding: 1rem 1.5rem;
+                min-width: auto;
+                flex: 0;
+                font-size: var(--small-font-size);
+            }
+
+            .report-price {
+                font-size: 2.5rem;
+            }
+
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .spatial-analysis-section {
+                padding: 2rem 1.5rem;
+            }
+
+            /* FIX #5: Smaller legend on mobile */
+            .map-legend {
+                min-width: 240px;
+                padding: 1rem;
+            }
+
+            /* FIX #6: Nearby areas 2 columns on mobile */
+            .nearby-areas {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .loading-spinner {
+                width: 100px;
+                height: 100px;
+            }
+
+            .loading-spinner i {
+                font-size: 3rem;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .progress-step-text {
+                display: none;
+            }
+
+            .progress-step {
+                min-width: 60px;
+                padding: 0.5rem;
+            }
+
+            .button {
+                padding: 0.875rem 1.25rem;
+                font-size: 0.813rem;
+            }
+        }
+
+        @media screen and (min-width: 1150px) {
+            .container {
+                padding: 0 2rem;
+            }
+
+            .form-card {
+                padding: 4rem;
+            }
+
+            #map {
+                height: 600px;
+            }
+
+            #reportMap {
+                height: 700px;
+            }
+        }
+
+        /* Amenities and Extra Features CSS */
+        .amenities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .amenity-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.25rem;
+            background: #ffffff;
+            border: 2px solid var(--gray-border);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: var(--font-semi-bold);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            user-select: none;
+        }
+
+        .amenity-checkbox:hover {
+            border-color: var(--first-color);
+            background: rgba(89, 31, 116, 0.02);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(89, 31, 116, 0.05);
+        }
+
+        .amenity-checkbox input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            accent-color: var(--first-color);
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .explanation-card {
+            transition: all 0.3s ease;
+        }
+        
+        .explanation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12) !important;
+        }
+
+        /* Top Navigation Header */
+        .top-header {
+            background: rgba(18, 7, 22, 0.95);
+            border-bottom: 1px solid rgba(125, 42, 158, 0.15);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            direction: rtl;
+        }
+        .top-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.3rem;
+            font-family: var(--body-font);
+        }
+        .top-header .logo i {
+            background: var(--first-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .top-header .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+        .top-header .nav-link {
+            color: #c3b8cb;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: color 0.3s;
+            font-family: var(--body-font);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .top-header .nav-link:hover {
+            color: #fff;
+        }
+        .top-header .btn-dashboard {
+            background: var(--first-gradient);
+            color: #fff;
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(89, 31, 116, 0.3);
+            transition: all 0.3s;
+            font-family: var(--body-font);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .top-header .btn-dashboard:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(89, 31, 116, 0.45);
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Header -->
+    <div class="top-header">
+        <a href="service3.html" class="logo">
+            <i class="ri-home-gear-line"></i>
+            <span>عقار ميتر</span>
+        </a>
+        <div class="nav-actions" id="headerNavActions">
+            <a href="login.html" class="nav-link" id="loginNavLink"><i class="ri-login-box-line"></i> تسجيل الدخول / إنشاء حساب</a>
+            <a href="dashboard.html" class="btn-dashboard" id="dashboardNavLink" style="display: none;"><i class="ri-dashboard-line"></i> لوحة التحكم</a>
+        </div>
+    </div>
+    <!-- Progress Bar -->
+    <div class="progress-section">
+        <div class="progress-wrapper">
+            <div class="progress-step active" data-step="1">
+                <div class="progress-step-number">1</div>
+                <span class="progress-step-text">Property Details</span>
+            </div>
+            <div class="progress-step" data-step="2">
+                <div class="progress-step-number">2</div>
+                <span class="progress-step-text">Images</span>
+            </div>
+            <div class="progress-step" data-step="3">
+                <div class="progress-step-number">3</div>
+                <span class="progress-step-text">Location</span>
+            </div>
+            <div class="progress-step" data-step="4">
+                <div class="progress-step-number">4</div>
+                <span class="progress-step-text">Report</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-container container">
+        <!-- Step 1: Property Details -->
+        <div class="form-section active" id="step1">
+            <div class="form-card">
+                <div class="form-header">
+                    <div class="form-icon">
+                        <i class="ri-home-4-fill"></i>
+                    </div>
+                    <h2>Property Details</h2>
+                    <p>Enter information about your property for accurate valuation</p>
+                </div>
+
+                <div class="form-grid">
+                    <!-- City -->
+                    <div class="form-group">
+                        <label>
+                            <i class="ri-map-pin-line"></i>
+                            City
+                        </label>
+                        <select id="city">
+                            <option value="Abha" selected>Abha (أبها)</option>
+                            <option value="Khamis Mushait">Khamis Mushait (خميس مشيط)</option>
+                            <option value="Riyadh">Riyadh (الرياض)</option>
+                        </select>
+                    </div>
+
+                    <!-- Neighborhood / District (Arabic names matching district_encodings.json) -->
+                    <div class="form-group">
+                        <label>
+                            <i class="ri-community-line"></i>
+                            Neighborhood (District)
+                        </label>
+                        <select id="neighborhood">
+                            <option value="">Select district</option>
+                            <option value="حي المنسك" selected>حي المنسك</option>
+                            <option value="حي الضباب">حي الضباب</option>
+                            <option value="حي المروج">حي المروج</option>
+                            <option value="حي السد">حي السد</option>
+                            <option value="حي الشفاء">حي الشفاء</option>
+                            <option value="حي العرين">حي العرين</option>
+                            <option value="حي ابها الجديدة">حي ابها الجديدة</option>
+                            <option value="حي الاندلس">حي الاندلس</option>
+                            <option value="حي البوادي">حي البوادي</option>
+                            <option value="حي الخالدية">حي الخالدية</option>
+                            <option value="حي الربوة">حي الربوة</option>
+                            <option value="حي الربيع">حي الربيع</option>
+                            <option value="حي الرصراص">حي الرصراص</option>
+                            <option value="حي الروضة">حي الروضة</option>
+                            <option value="حي الرونه">حي الرونه</option>
+                            <option value="حي السروات">حي السروات</option>
+                            <option value="حي السلام">حي السلام</option>
+                            <option value="حي السلامة">حي السلامة</option>
+                            <option value="حي الشرفية">حي الشرفية</option>
+                            <option value="حي الصالحية">حي الصالحية</option>
+                            <option value="حي العزيزية">حي العزيزية</option>
+                            <option value="حي الفتح">حي الفتح</option>
+                            <option value="حي الفيصلي">حي الفيصلي</option>
+                            <option value="حي القريقر">حي القريقر</option>
+                            <option value="حي المدينة العسكرية">حي المدينة العسكرية</option>
+                            <option value="حي المصيف">حي المصيف</option>
+                            <option value="حي المعمورة">حي المعمورة</option>
+                            <option value="حي المنتزه">حي المنتزه</option>
+                            <option value="حي المنهل">حي المنهل</option>
+                            <option value="حي النزهة">حي النزهة</option>
+                            <option value="حي النسيم">حي النسيم</option>
+                            <option value="حي النهضة">حي النهضة</option>
+                            <option value="حي الهرير">حي الهرير</option>
+                            <option value="حي الواحة">حي الواحة</option>
+                            <option value="حي الورود">حي الورود</option>
+                            <option value="حي درة المنسك">حي درة المنسك</option>
+                            <option value="حي ذرة">حي ذرة</option>
+                            <option value="حي ذلالة">حي ذلالة</option>
+                            <option value="حي شباعة">حي شباعة</option>
+                            <option value="حي شمسان">حي شمسان</option>
+                            <option value="حي صفوان">حي صفوان</option>
+                            <option value="حي ضمك">حي ضمك</option>
+                            <option value="حي عتود">حي عتود</option>
+                            <option value="حي مخطط الموسى">حي مخطط الموسى</option>
+                            <option value="حي وسط البلد">حي وسط البلد</option>
+                        </select>
+                    </div>
+
+                    <!-- Property Type -->
+                    <div class="form-group">
+                        <label>
+                            <i class="ri-building-line"></i>
+                            Property Type
+                        </label>
+                        <select id="propertyType">
+                            <option value="">Select property type</option>
+                            <option value="Villa" selected>Villa (فيلا)</option>
+                            <option value="Apartment">Apartment (شقة)</option>
+                            <option value="Duplex">Duplex (دور/دوبلكس)</option>
+                            <option value="Land">Land (أرض)</option>
+                        </select>
+                    </div>
+
+                    <!-- Area -->
+                    <div class="form-group">
+                        <label>
+                            <i class="ri-ruler-line"></i>
+                            Area (sqm)
+                        </label>
+                        <input type="number" id="area" placeholder="e.g., 255" min="1" value="255">
+                    </div>
+
+                    <!-- Bedrooms -->
+                    <div class="form-group">
+                        <label>
+                            <i class="ri-hotel-bed-line"></i>
+                            Bedrooms
+                        </label>
+                        <input type="number" id="bedrooms" placeholder="e.g., 4" min="0" value="4">
+                    </div>
+
+                    <!-- Bathrooms -->
+                    <div class="form-group">
+                        <label>
+                            <i class="ri-shower-line"></i>
+                            Bathrooms (WCs)
+                        </label>
+                        <input type="number" id="bathrooms" placeholder="e.g., 3" min="0" value="3">
+                    </div>
+
+                    <!-- Living Rooms -->
+                    <div class="form-group">
+                        <label>
+                            <i class="ri-sofa-line"></i>
+                            Living Rooms
+                        </label>
+                        <input type="number" id="livings" placeholder="e.g., 2" min="0" value="2">
+                    </div>
+
+                    <!-- Property Age -->
+                    <div class="form-group">
+                        <label>
+                            <i class="ri-time-line"></i>
+                            Property Age (years)
+                        </label>
+                        <input type="number" id="propertyAge" placeholder="e.g., 5" min="0" value="5">
+                    </div>
+
+                    <!-- Street Width -->
+                    <div class="form-group">
+                        <label>
+                            <i class="ri-road-map-line"></i>
+                            Street Width (meters)
+                        </label>
+                        <input type="number" id="streetWidth" placeholder="e.g., 15" min="0" value="15">
+                    </div>
+                </div>
+
+                <!-- Amenities and Extra Features Section -->
+                <div style="margin-top: 2.5rem; margin-bottom: 2rem;">
+                    <h3 style="color: var(--title-color); font-size: var(--h3-font-size); font-weight: var(--font-bold); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="ri-service-line" style="color: var(--first-color);"></i>
+                        Amenities & Extra Features
+                    </h3>
+                    <div class="amenities-grid">
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" id="elevator">
+                            <span>Elevator (مصعد)</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" id="ac" checked>
+                            <span>Air Conditioning (تكييف)</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" id="furnished">
+                            <span>Furnished (مفروش)</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" id="pool">
+                            <span>Swimming Pool (مسبح)</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" id="car_entrance" checked>
+                            <span>Car Entrance (مدخل سيارة)</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" id="basement">
+                            <span>Basement (قبو)</span>
+                        </label>
+                        <label class="amenity-checkbox">
+                            <input type="checkbox" id="yard" checked>
+                            <span>Yard / Backyard (حوش/فناء)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="button button-primary" onclick="nextStep(2)">
+                        Next
+                        <i class="ri-arrow-right-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Image Upload -->
+        <div class="form-section" id="step2">
+            <div class="form-card">
+                <div class="form-header">
+                    <div class="form-icon">
+                        <i class="ri-image-fill"></i>
+                    </div>
+                    <h2>Property Images</h2>
+                    <p>
+                        Upload clear exterior photos. Multiple angles improve valuation accuracy
+                    </p>
+                </div>
+
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="ri-upload-cloud-2-line"></i>
+                        </div>
+                        <h3>Drag & drop images here</h3>
+                        <p>or click to browse files</p>
+                        <p style="margin-top: 0.5rem;">Supported: JPG, PNG (Max 5MB per file)</p>
+                        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+                    </div>
+
+                    <div class="preview-grid" id="previewGrid"></div>
+                </div>
+
+                <div class="button-group">
+                    <button class="button button-secondary" onclick="prevStep(1)">
+                        <i class="ri-arrow-left-line"></i>
+                        Back
+                    </button>
+                    <button class="button button-primary" onclick="nextStep(3)">
+                        Next
+                        <i class="ri-arrow-right-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Location -->
+        <div class="form-section" id="step3">
+            <div class="form-card">
+                <div class="form-header">
+                    <div class="form-icon">
+                        <i class="ri-map-pin-fill"></i>
+                    </div>
+                    <h2>Property Location</h2>
+                    <p>Click on the map to pin your property's exact location</p>
+                </div>
+
+                <div class="map-wrapper" style="position: relative; margin-bottom: 1.5rem;">
+                    <!-- Geocoding Search Bar -->
+                    <div class="map-search-container" style="position: absolute; top: 15px; left: 15px; right: 15px; z-index: 1000; display: flex; gap: 0.5rem; background: var(--container-color); padding: 0.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid var(--gray-border);">
+                        <input type="text" id="mapSearchInput" placeholder="بحث عن موقع (مثال: حي المنسك، ابها)..." style="flex: 1; border: none; padding: 0.75rem 1rem; outline: none; font-family: var(--body-font); font-size: var(--normal-font-size); background: transparent;" />
+                        <button id="mapSearchBtn" class="button" style="min-width: auto; padding: 0.75rem 1.5rem; margin-top: 0; box-shadow: none; border-radius: 8px; background: var(--first-gradient); color: var(--white-color);">
+                            <i class="ri-search-line"></i>
+                            بحث
+                        </button>
+                    </div>
+                    <div id="map" style="margin-bottom: 0;"></div>
+                </div>
+                
+                <div class="map-info">
+                    <div class="map-info-item">
+                        <i class="ri-map-pin-line"></i>
+                        <p id="coordinates"> Your Current Latitude: 24.7136, Longitude: 46.6753 (Riyadh default)</p>
+                    </div>
+                    <div class="map-info-item">
+                        <i class="ri-information-line"></i>
+                     </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="button button-secondary" onclick="prevStep(2)">
+                        <i class="ri-arrow-left-line"></i>
+                        Back
+                    </button>
+                    <button class="button button-primary" onclick="generateReport()">
+                        Generate Report
+                        <i class="ri-file-chart-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Report -->
+        <div class="form-section" id="step4">
+            <div class="loading" id="loadingState">
+                <div class="loading-spinner">
+                    <i class="ri-loader-4-line"></i>
+                </div>
+                <h3 class="loading-title" style="margin-bottom: 1.5rem; font-family: var(--body-font);">جاري معالجة طلب التقييم بالذكاء الاصطناعي</h3>
+                <div class="loading-checklist" style="max-width: 450px; margin: 0 auto; text-align: right; direction: rtl; display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+                    <div class="checklist-item" id="chkStep1" style="display: flex; align-items: center; gap: 0.75rem; font-size: 1.05rem; color: var(--text-color-light); transition: all 0.3s ease;">
+                        <i class="ri-checkbox-blank-circle-line" style="font-size: 1.3rem;"></i>
+                        <span>أرشفة وتحليل موقع العقار الجغرافي</span>
+                    </div>
+                    <div class="checklist-item" id="chkStep2" style="display: flex; align-items: center; gap: 0.75rem; font-size: 1.05rem; color: var(--text-color-light); transition: all 0.3s ease;">
+                        <i class="ri-checkbox-blank-circle-line" style="font-size: 1.3rem;"></i>
+                        <span>استعلام الصفقات المقارنة القريبة من قاعدة البيانات</span>
+                    </div>
+                    <div class="checklist-item" id="chkStep3" style="display: flex; align-items: center; gap: 0.75rem; font-size: 1.05rem; color: var(--text-color-light); transition: all 0.3s ease;">
+                        <i class="ri-checkbox-blank-circle-line" style="font-size: 1.3rem;"></i>
+                        <span>حساب المسافات الجغرافية لمركز المدينة وعوامل التقييم</span>
+                    </div>
+                    <div class="checklist-item" id="chkStep4" style="display: flex; align-items: center; gap: 0.75rem; font-size: 1.05rem; color: var(--text-color-light); transition: all 0.3s ease;">
+                        <i class="ri-checkbox-blank-circle-line" style="font-size: 1.3rem;"></i>
+                        <span>تشغيل نموذج الذكاء الاصطناعي (XGBoost) وإصدار التقرير</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message Block -->
+            <div id="errorMessage" style="display: none; text-align: center; padding: 4rem 2rem;">
+                <div style="background: rgba(235, 94, 85, 0.1); color: #eb5e55; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; font-size: 3rem;">
+                    <i class="ri-error-warning-line"></i>
+                </div>
+                <h3 style="color: var(--title-color); margin-bottom: 1rem;">Valuation Failed</h3>
+                <p class="error-text" style="color: var(--text-color-light); margin-bottom: 2rem;">Could not connect to the local AI backend server.</p>
+                <div class="button-group">
+                    <button class="button button-secondary" onclick="prevStep(3)">
+                        <i class="ri-arrow-left-line"></i>
+                        Back to Map
+                    </button>
+                    <button class="button button-primary" onclick="generateReport()">
+                        <i class="ri-refresh-line"></i>
+                        Retry
+                    </button>
+                </div>
+            </div>
+
+            <div id="reportContent" style="display: none;">
+                <div class="report-hero">
+                    <h2>Property Valuation Report</h2>
+                    <p>Aqaar meter AI-Generated Comprehensive Analysis</p>
+                    <div class="report-price" id="estimatedPrice">SAR 2,000,000</div>
+                    <p>Estimated Market Value</p>
+                </div>
+
+                <!-- Spatial Analysis Section -->
+                <div class="spatial-analysis-section">
+                    <div class="spatial-header">
+                        <h3>
+                            <i class="ri-map-2-fill"></i>
+                            Spatial Analysis & Nearby Areas
+                        </h3>
+                        <p>Interactive map showing density patterns and surrounding amenities</p>
+                    </div>
+
+                    <div id="reportMap"></div>
+
+                    <!-- CMA Comparison Table -->
+                    <div class="cma-table-container" style="margin-top: 2rem; margin-bottom: 2.5rem; background: var(--container-color); border-radius: 15px; border: 2px solid var(--gray-border); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                        <div style="background: var(--first-gradient); padding: 1.25rem; color: var(--white-color); display: flex; align-items: center; justify-content: space-between; direction: rtl;">
+                            <h4 style="margin: 0; font-family: var(--body-font); font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem; color: white;">
+                                <i class="ri-table-line"></i>
+                                جدول الصفقات المقارنة القريبة (CMA)
+                            </h4>
+                            <span style="font-size: var(--small-font-size); opacity: 0.9; font-family: var(--body-font); color: white;">أقرب 3 صفقات بيع مسجلة بالحي للتحليل المقارن</span>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: right; direction: rtl; font-family: var(--body-font);">
+                                <thead>
+                                    <tr style="background: var(--body-color); border-bottom: 2px solid var(--gray-border); color: var(--title-color); font-weight: var(--font-bold);">
+                                        <th style="padding: 1rem; font-size: 0.9rem; text-align: right;">الحي</th>
+                                        <th style="padding: 1rem; font-size: 0.9rem; text-align: right;">المسافة</th>
+                                        <th style="padding: 1rem; font-size: 0.9rem; text-align: right;">المساحة</th>
+                                        <th style="padding: 1rem; font-size: 0.9rem; text-align: right;">سعر المتر</th>
+                                        <th style="padding: 1rem; font-size: 0.9rem; text-align: right;">السعر الإجمالي</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cmaTableBody">
+                                    <tr>
+                                        <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-color-light);">جاري تحميل الصفقات المقارنة القريبة...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="nearby-areas">
+                        <div class="nearby-card">
+                            <div class="nearby-card-header">
+                                <div class="nearby-icon">
+                                    <i class="ri-shopping-bag-line"></i>
+                                </div>
+                                <div>
+                                    <h4>Shopping Centers</h4>
+                                    <p class="nearby-distance">1.5 km away</p>
+                                </div>
+                            </div>
+                            <span class="nearby-status excellent">Excellent Access</span>
+                        </div>
+
+                        <div class="nearby-card">
+                            <div class="nearby-card-header">
+                                <div class="nearby-icon">
+                                    <i class="ri-school-line"></i>
+                                </div>
+                                <div>
+                                    <h4>Schools & Education</h4>
+                                    <p class="nearby-distance">3.2 km away</p>
+                                </div>
+                            </div>
+                            <span class="nearby-status excellent">Excellent Access</span>
+                        </div>
+
+                        <div class="nearby-card">
+                            <div class="nearby-card-header">
+                                <div class="nearby-icon">
+                                    <i class="ri-hospital-line"></i>
+                                </div>
+                                <div>
+                                    <h4>Healthcare</h4>
+                                    <p class="nearby-distance">2.8 km away</p>
+                                </div>
+                            </div>
+                            <span class="nearby-status excellent">Excellent Access</span>
+                        </div>
+
+                        <div class="nearby-card">
+                            <div class="nearby-card-header">
+                                <div class="nearby-icon">
+                                    <i class="ri-bus-line"></i>
+                                </div>
+                                <div>
+                                    <h4>Public Transport</h4>
+                                    <p class="nearby-distance">0.8 km away</p>
+                                </div>
+                            </div>
+                            <span class="nearby-status excellent">Excellent Access</span>
+                        </div>
+
+                        <div class="nearby-card">
+                            <div class="nearby-card-header">
+                                <div class="nearby-icon">
+                                    <i class="ri-restaurant-line"></i>
+                                </div>
+                                <div>
+                                    <h4>Restaurants & Cafes</h4>
+                                    <p class="nearby-distance">1.2 km away</p>
+                                </div>
+                            </div>
+                            <span class="nearby-status excellent">Excellent Access</span>
+                        </div>
+
+                        <div class="nearby-card">
+                            <div class="nearby-card-header">
+                                <div class="nearby-icon">
+                                    <i class="ri-parking-box-line"></i>
+                                </div>
+                                <div>
+                                    <h4>Parking Facilities</h4>
+                                    <p class="nearby-distance">On-site</p>
+                                </div>
+                            </div>
+                            <span class="nearby-status excellent">Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-grid">
+                    <div class="report-card">
+                        <div class="report-card-header">
+                            <div class="report-card-icon">
+                                <i class="ri-home-4-fill"></i>
+                            </div>
+                            <h3>Property Summary</h3>
+                        </div>
+                        <div class="report-item">
+                            <span class="report-item-label">Property Type</span>
+                            <span class="report-item-value" id="reportPropertyType">-</span>
+                        </div>
+                        <div class="report-item">
+                            <span class="report-item-label">Total Area</span>
+                            <span class="report-item-value" id="reportArea">-</span>
+                        </div>
+                        <div class="report-item">
+                            <span class="report-item-label">Facilities</span>
+                            <span class="report-item-value" id="reportFacilities">-</span>
+                        </div>
+                        <div class="report-item">
+                            <span class="report-item-label">Street View</span>
+                            <span class="report-item-value" id="reportStreetView">-</span>
+                        </div>
+                        <div class="report-item">
+                            <span class="report-item-label">Neighborhood</span>
+                            <span class="report-item-value" id="reportNeighborhood">-</span>
+                        </div>
+                    </div>
+
+                    <div class="report-card">
+                        <div class="report-card-header">
+                            <div class="report-card-icon">
+                                <i class="ri-line-chart-fill"></i>
+                            </div>
+                            <h3>Market Analysis</h3>
+                        </div>
+                        <div class="report-item">
+                            <span class="report-item-label">Price per sqm</span>
+                            <span class="report-item-value" id="pricePerSqm">-</span>
+                        </div>
+                        <div class="report-item">
+                            <span class="report-item-label">Market Trend</span>
+                            <span class="report-item-value" style="color: #4c6449;"> Growing</span>
+                        </div>
+                        <div class="report-item">
+                            <span class="report-item-label">Confidence Score</span>
+                            <span class="report-item-value" id="confidenceScore">-</span>
+                        </div>
+                        <div class="report-item">
+                            <span class="report-item-label">Valuation Range</span>
+                            <span class="report-item-value" id="valuationRange">-</span>
+                        </div>
+                        <div class="report-item">
+                            <span class="report-item-label">Market Trend</span>
+                            <span class="report-item-value" style="color: #4c6449;">↑ Growing</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="explanation-card" style="margin-top: 2rem; background: var(--container-color); padding: 2.5rem; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: right; dir: rtl;">
+                    <h3 style="color: var(--first-color); margin-bottom: 1rem; display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; font-family: var(--body-font);">
+                        تحليل القيمة العادلة من الذكاء الاصطناعي
+                        <i class="ri-brain-line"></i>
+                    </h3>
+                    <p id="valuationExplanation" style="color: var(--text-color); font-size: var(--normal-font-size); line-height: 1.8; font-family: var(--body-font);">-</p>
+                </div>
+
+                <!-- Market Trends Chart -->
+                <div class="report-card" style="margin-top: 2rem; background: var(--container-color); padding: 2.5rem; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08);">
+                    <div class="report-card-header" style="justify-content: flex-end; margin-bottom: 1.5rem; direction: rtl; text-align: right; display: flex; align-items: center; gap: 0.5rem;">
+                        <h3 style="color: var(--first-color); font-family: var(--body-font); margin: 0; display: flex; align-items: center; gap: 0.5rem; font-size: 1.3rem;">
+                            تحليلات أسعار المتر المربع في الحي
+                            <i class="ri-bar-chart-2-line"></i>
+                        </h3>
+                    </div>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="marketTrendsChart"></canvas>
+                    </div>
+                </div>
+ 
+                <div class="button-group" style="margin-top: 2.5rem;">
+                    <button class="button button-secondary" onclick="prevStep(3)">
+                        <i class="ri-arrow-left-line"></i>
+                        Back to Map
+                    </button>
+                    <button class="button button-primary" onclick="downloadReport()">
+                        <i class="ri-download-line"></i>
+                        Download Report (PDF)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let currentStep = 1;
+        let uploadedFiles = [];
+        let map, marker;
+        let reportMap;
+        let selectedLocation = { lat: 18.2164, lng: 42.5053 }; // Centered on Abha initially
+        let closestSales = []; // Global to store closest 3 comparable sales
+        let apiData = null; // Global variable to store prediction response
+        let marketChartInstance = null;
+
+        // English Translation Helper for District Names
+        function getEnglishDistrictName(arName) {
+            if (!arName) return 'Aseer District';
+            const mapping = {
+                'حي المنسك': 'Al-Mansak',
+                'حي الضباب': 'Al-Dhabab',
+                'حي المروج': 'Al-Murooj',
+                'حي السد': 'Al-Sadd',
+                'حي الشفاء': 'Al-Shifa',
+                'حي العرين': 'Al-Areen',
+                'حي ابها الجديدة': 'New Abha',
+                'حي الاندلس': 'Al-Andalus',
+                'حي البوادي': 'Al-Bawadi',
+                'حي الخالدية': 'Al-Khalidiyah',
+                'حي الربوة': 'Al-Rabwah',
+                'حي الربيع': 'Al-Rabee',
+                'حي الرصراص': 'Al-Rasras',
+                'حي الروضة': 'Al-Rawdah',
+                'حي الرونه': 'Al-Roonah',
+                'حي السروات': 'Al-Sarawat',
+                'حي السلام': 'Al-Salam',
+                'حي السلامة': 'Al-Salamah',
+                'حي الشرفية': 'Al-Sharafiyah',
+                'حي الصالحية': 'Al-Salhiyah',
+                'حي العزيزية': 'Al-Aziziyah',
+                'حي الفتح': 'Al-Fatih',
+                'حي الفيصلي': 'Al-Faisaliyah',
+                'حي القريقر': 'Al-Qariqar',
+                'حي المدينة العسكرية': 'Military City',
+                'حي المصيف': 'Al-Masyaf',
+                'حي المعمورة': 'Al-Mamorah',
+                'حي المنتزه': 'Al-Montazah',
+                'حي المنهل': 'Al-Manhal',
+                'حي النزهة': 'Al-Nuzhah',
+                'حي النسيم': 'Al-Naseem',
+                'حي النهضة': 'Al-Nahdah',
+                'حي الهرير': 'Al-Harir',
+                'حي الواحة': 'Al-Waha',
+                'حي الورود': 'Al-Wurood',
+                'حي درة المنسك': 'Dorat Al-Mansak',
+                'حي ذرة': 'Dharah',
+                'حي ذلالة': 'Dhalalah',
+                'حي شباعة': 'Shabah',
+                'حي شمسان': 'Shamsan',
+                'حي صفوان': 'Safwan',
+                'حي ضمك': 'Damak',
+                'حي عتود': 'Atood',
+                'حي مخطط الموسى': 'Al-Mousa Scheme',
+                'حي وسط البلد': 'Downtown'
+            };
+            return mapping[arName.trim()] || arName;
+        }
+
+        // Initialize input map
+        function initMap() {
+            map = L.map('map').setView([selectedLocation.lat, selectedLocation.lng], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            marker = L.marker([selectedLocation.lat, selectedLocation.lng], {
+                draggable: true
+            }).addTo(map);
+
+            map.on('click', function(e) {
+                selectedLocation = { lat: e.latlng.lat, lng: e.latlng.lng };
+                marker.setLatLng(e.latlng);
+                updateCoordinates();
+            });
+
+            marker.on('dragend', function(e) {
+                selectedLocation = { lat: e.target.getLatLng().lat, lng: e.target.getLatLng().lng };
+                updateCoordinates();
+            });
+
+            // Set up search event listeners
+            document.getElementById('mapSearchBtn').addEventListener('click', searchLocation);
+            document.getElementById('mapSearchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchLocation();
+                }
+            });
+        }
+
+        function updateCoordinates() {
+            document.getElementById('coordinates').textContent = 
+                `Latitude: ${selectedLocation.lat.toFixed(6)}, Longitude: ${selectedLocation.lng.toFixed(6)}`;
+        }
+
+        // Geocoding search function using Nominatim API
+        async function searchLocation() {
+            const query = document.getElementById('mapSearchInput').value.trim();
+            if (!query) return;
+
+            const searchBtn = document.getElementById('mapSearchBtn');
+            const originalHtml = searchBtn.innerHTML;
+            searchBtn.innerHTML = '<i class="ri-loader-4-line spin"></i>';
+            searchBtn.disabled = true;
+
+            try {
+                // Query Nominatim API with restriction to Saudi Arabia (countrycodes=sa)
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=sa&limit=1`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept-Language': 'ar,en',
+                        'User-Agent': 'AqaarMeterValuationApp/1.0'
+                    }
+                });
+                if (!response.ok) throw new Error('Search request failed');
+                
+                const results = await response.json();
+                if (results && results.length > 0) {
+                    const firstResult = results[0];
+                    const lat = parseFloat(firstResult.lat);
+                    const lng = parseFloat(firstResult.lon);
+                    
+                    selectedLocation = { lat, lng };
+                    if (map && marker) {
+                        map.setView([lat, lng], 15);
+                        marker.setLatLng([lat, lng]);
+                        updateCoordinates();
+                    }
+                } else {
+                    alert('لم يتم العثور على الموقع، يرجى المحاولة بصيغة أخرى (مثال: حي المنسك، أبها)');
+                }
+            } catch (err) {
+                console.error("Geocoding failed:", err);
+                alert('حدث خطأ أثناء البحث عن الموقع. يرجى المحاولة مرة أخرى.');
+            } finally {
+                searchBtn.innerHTML = originalHtml;
+                searchBtn.disabled = false;
+            }
+        }
+
+        // Handle city selection change to center the map
+        document.getElementById('city').addEventListener('change', function() {
+            const city = this.value;
+            if (city === 'Abha') {
+                selectedLocation = { lat: 18.2164, lng: 42.5053 };
+            } else if (city === 'Khamis Mushait') {
+                selectedLocation = { lat: 18.3064, lng: 42.7292 };
+            } else if (city === 'Riyadh') {
+                selectedLocation = { lat: 24.7136, lng: 46.6753 };
+            }
+            if (map && marker) {
+                map.setView([selectedLocation.lat, selectedLocation.lng], 13);
+                marker.setLatLng([selectedLocation.lat, selectedLocation.lng]);
+                updateCoordinates();
+            }
+        });
+
+        // Initialize report map with spatial analysis
+        function initReportMap() {
+            reportMap = L.map('reportMap').setView([selectedLocation.lat, selectedLocation.lng], 14);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(reportMap);
+
+            // Add property marker
+            const propertyIcon = L.divIcon({
+                className: 'density-marker',
+                html: '<div style="background: #591f74; width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.3);"></div>',
+                iconSize: [40, 40]
+            });
+
+            L.marker([selectedLocation.lat, selectedLocation.lng], { icon: propertyIcon })
+                .addTo(reportMap)
+                .bindPopup(`
+                    <div class="popup-content">
+                        <h4><i class="ri-home-4-line"></i> Your Property</h4>
+                        <p><strong>Location:</strong> ${selectedLocation.lat.toFixed(4)}, ${selectedLocation.lng.toFixed(4)}</p>
+                        <p><strong>Value:</strong> ${document.getElementById('estimatedPrice').textContent}</p>
+                    </div>
+                `);
+
+            // Add density circles (simulated spatial analysis)
+            addDensityCircles();
+
+            // Add legend to map
+            addMapLegend();
+
+            // Draw real comparative transactions (CMA) and load trend charts
+            drawNearbySalesMarkers();
+            loadMarketTrendsChart();
+        }
+
+        function addMapLegend() {
+            const legend = L.control({ position: 'bottomleft' });
+
+            legend.onAdd = function (map) {
+                const div = L.DomUtil.create('div', 'map-legend');
+                div.innerHTML = `
+                    <div class="legend-title">
+                        <i class="ri-list-check"></i>
+                        Legend
+                    </div>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-color property"></div>
+                            <span class="legend-text">Your Property</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color high-density"></div>
+                            <span class="legend-text">High Density</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color medium-density"></div>
+                            <span class="legend-text">Medium Density</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color low-density"></div>
+                            <span class="legend-text">Low Density</span>
+                        </div>
+                    </div>
+                `;
+                return div;
+            };
+
+            legend.addTo(reportMap);
+        }
+
+        function standardizeApiData(data) {
+            return {
+                id: data.id,
+                predicted_price: data.predicted_price !== undefined ? data.predicted_price : data.predictedPrice,
+                min_price: data.min_price !== undefined ? data.min_price : data.minPrice,
+                max_price: data.max_price !== undefined ? data.max_price : data.maxPrice,
+                confidence_score: data.confidence_score !== undefined ? data.confidence_score : data.confidenceScore,
+                explanation: data.explanation,
+                used_features: data.used_features || {
+                    distance_to_center_km: data.distanceToCenter || 3.5,
+                    luxury_score_out_of_4: (data.elevator ? 1 : 0) + (data.ac ? 1 : 0) + (data.pool ? 1 : 0) + (data.furnished ? 1 : 0),
+                    infra_score_out_of_3: (data.carEntrance ? 1 : 0) + (data.basement ? 1 : 0) + (data.yard ? 1 : 0),
+                }
+            };
+        }
+
+        async function drawNearbySalesMarkers() {
+            try {
+                const propType = document.getElementById('propertyType').value;
+                const response = await fetch(`http://localhost:5000/api/predict/nearby?lat=${selectedLocation.lat}&lng=${selectedLocation.lng}&radiusKm=5&propertyType=${propType}&limit=12`);
+                if (!response.ok) return;
+                const sales = await response.json();
+                
+                // Render markers on reportMap
+                sales.forEach(sale => {
+                    const saleIcon = L.divIcon({
+                        className: 'sale-marker',
+                        html: '<div style="background: #2ec4b6; width: 25px; height: 25px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:bold;">$</div>',
+                        iconSize: [25, 25]
+                    });
+                    
+                    L.marker([sale.latitude, sale.longitude], { icon: saleIcon })
+                        .addTo(reportMap)
+                        .bindPopup(`
+                            <div class="popup-content" style="direction: rtl; text-align: right; font-family: 'Arimo', sans-serif;">
+                                <h4 style="color: #2ec4b6; margin-bottom: 0.35rem; font-weight:700;"><i class="ri-checkbox-circle-fill"></i> صفقة بيع مقارنة</h4>
+                                <p style="margin: 0.15rem 0;"><strong>سعر البيع:</strong> SAR ${Math.round(sale.price).toLocaleString()}</p>
+                                <p style="margin: 0.15rem 0;"><strong>المساحة:</strong> ${sale.area} م²</p>
+                                <p style="margin: 0.15rem 0;"><strong>سعر المتر:</strong> SAR ${Math.round(sale.price_per_sqm).toLocaleString()}/م²</p>
+                                <p style="margin: 0.15rem 0;"><strong>المسافة:</strong> ${sale.distance_km} كم</p>
+                                <p style="margin: 0.15rem 0;"><strong>الحي:</strong> ${sale.district}</p>
+                            </div>
+                        `);
+                });
+
+                // Populate CMA Table with top 3 closest sales
+                closestSales = sales.slice(0, 3);
+                const tableBody = document.getElementById('cmaTableBody');
+                if (tableBody) {
+                    if (closestSales.length === 0) {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-color-light);">لا توجد صفقات مقارنة قريبة مسجلة في هذا النطاق الجغرافي.</td>
+                            </tr>
+                        `;
+                    } else {
+                        tableBody.innerHTML = closestSales.map(sale => `
+                            <tr style="border-bottom: 1px solid var(--gray-border); transition: background 0.2s;" onmouseover="this.style.background='rgba(89, 31, 116, 0.02)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 1rem; color: var(--title-color); font-weight: var(--font-medium);">${sale.district || '-'}</td>
+                                <td style="padding: 1rem; color: var(--text-color);">${sale.distance_km} كم</td>
+                                <td style="padding: 1rem; color: var(--text-color);">${sale.area} م²</td>
+                                <td style="padding: 1rem; color: var(--second-color); font-weight: var(--font-semi-bold);">SAR ${Math.round(sale.price_per_sqm).toLocaleString()}/م²</td>
+                                <td style="padding: 1rem; color: var(--first-color); font-weight: var(--font-bold);">SAR ${Math.round(sale.price).toLocaleString()}</td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load nearby sales for map and table:", e);
+                const tableBody = document.getElementById('cmaTableBody');
+                if (tableBody) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="padding: 2rem; text-align: center; color: #eb5e55;">فشل تحميل الصفقات المقارنة. يرجى التحقق من اتصال الخادم.</td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        async function loadMarketTrendsChart() {
+            try {
+                const district = document.getElementById('neighborhood').value || document.getElementById('district').value || 'حي المنسك';
+                const response = await fetch(`http://localhost:5000/api/analytics/trends?district=${encodeURIComponent(district)}`);
+                if (!response.ok) return;
+                const trends = await response.json();
+                
+                const ctx = document.getElementById('marketTrendsChart').getContext('2d');
+                
+                if (marketChartInstance) {
+                    marketChartInstance.destroy();
+                }
+
+                // Prepare data
+                const labels = trends.byPropertyType.map(x => {
+                    if (x.propertyType === 'Villa') return 'فيلا';
+                    if (x.propertyType === 'Apartment') return 'شقة';
+                    if (x.propertyType === 'Duplex') return 'دور';
+                    if (x.propertyType === 'Land') return 'أرض';
+                    return x.propertyType;
+                });
+                const pricesPerSqm = trends.byPropertyType.map(x => x.averagePricePerSqm);
+
+                marketChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'متوسط سعر المتر المربع (SAR/م²)',
+                            data: pricesPerSqm,
+                            backgroundColor: [
+                                'rgba(125, 42, 158, 0.65)',
+                                'rgba(76, 100, 73, 0.7)',
+                                'rgba(46, 196, 182, 0.65)',
+                                'rgba(253, 150, 68, 0.65)'
+                            ],
+                            borderColor: [
+                                '#7d2a9e',
+                                '#4c6449',
+                                '#2ec4b6',
+                                '#fd9644'
+                            ],
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.08)'
+                                },
+                                ticks: {
+                                    color: '#c3b8cb',
+                                    font: {
+                                        family: 'Arimo'
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#c3b8cb',
+                                    font: {
+                                        family: 'Arimo',
+                                        weight: 'bold'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error("Failed to load Chart.js statistics:", e);
+            }
+        }
+
+        function addDensityCircles() {
+            // High density area (commercial/busy areas)
+            const highDensity = [
+                { lat: selectedLocation.lat + 0.01, lng: selectedLocation.lng + 0.01, radius: 500 },
+                { lat: selectedLocation.lat - 0.015, lng: selectedLocation.lng + 0.02, radius: 600 }
+            ];
+
+            highDensity.forEach(area => {
+                L.circle([area.lat, area.lng], {
+                    color: '#ff4757',
+                    fillColor: '#ff4757',
+                    fillOpacity: 0.3,
+                    radius: area.radius
+                }).addTo(reportMap).bindPopup(`
+                    <div class="popup-content">
+                        <h4><i class="ri-home-heart-line"></i> High Density Area</h4>
+                        <p>Heavy traffic and commercial activity</p>
+                        <p><strong>Impact:</strong> Moderate accessibility</p>
+                    </div>
+                `);
+            });
+
+            // Medium density
+            const mediumDensity = [
+                { lat: selectedLocation.lat - 0.01, lng: selectedLocation.lng - 0.01, radius: 550 },
+                { lat: selectedLocation.lat + 0.02, lng: selectedLocation.lng - 0.015, radius: 450 }
+            ];
+
+            mediumDensity.forEach(area => {
+                L.circle([area.lat, area.lng], {
+                    color: '#ffa502',
+                    fillColor: '#ffa502',
+                    fillOpacity: 0.3,
+                    radius: area.radius
+                }).addTo(reportMap).bindPopup(`
+                    <div class="popup-content">
+                        <h4><i class="ri-community-line"></i> Medium Density</h4>
+                        <p>Balanced residential-commercial mix</p>
+                        <p><strong>Impact:</strong> Good accessibility</p>
+                    </div>
+                `);
+            });
+
+            // Low density (quiet residential)
+            const lowDensity = [
+                { lat: selectedLocation.lat + 0.005, lng: selectedLocation.lng - 0.02, radius: 400 },
+                { lat: selectedLocation.lat - 0.02, lng: selectedLocation.lng - 0.015, radius: 500 }
+            ];
+
+            lowDensity.forEach(area => {
+                L.circle([area.lat, area.lng], {
+                    color: '#26de81',
+                    fillColor: '#26de81',
+                    fillOpacity: 0.3,
+                    radius: area.radius
+                }).addTo(reportMap).bindPopup(`
+                    <div class="popup-content">
+                        <h4><i class="ri-home-smile-line"></i> Low Density Area</h4>
+                        <p>Quiet residential neighborhood</p>
+                        <p><strong>Impact:</strong> Excellent living quality</p>
+                    </div>
+                `);
+            });
+
+            // Add nearby amenities markers
+            addAmenityMarkers();
+        }
+
+        function addAmenityMarkers() {
+            const amenities = [
+                { lat: selectedLocation.lat + 0.012, lng: selectedLocation.lng + 0.015, icon: 'shopping-bag', name: 'Shopping Center', type: 'shopping' },
+                { lat: selectedLocation.lat + 0.025, lng: selectedLocation.lng - 0.01, icon: 'school', name: 'International School', type: 'education' },
+                { lat: selectedLocation.lat - 0.022, lng: selectedLocation.lng + 0.018, icon: 'hospital', name: 'Medical Center', type: 'healthcare' },
+                { lat: selectedLocation.lat + 0.008, lng: selectedLocation.lng - 0.008, icon: 'bus', name: 'Bus Station', type: 'transport' },
+                { lat: selectedLocation.lat - 0.01, lng: selectedLocation.lng + 0.01, icon: 'restaurant', name: 'Food District', type: 'dining' }
+            ];
+
+            amenities.forEach(amenity => {
+                const amenityIcon = L.divIcon({
+                    className: 'amenity-marker',
+                    html: `<div style="background: #4c6449; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"><i class="ri-${amenity.icon}-line"></i></div>`,
+                    iconSize: [30, 30]
+                });
+
+                L.marker([amenity.lat, amenity.lng], { icon: amenityIcon })
+                    .addTo(reportMap)
+                    .bindPopup(`
+                        <div class="popup-content">
+                            <h4><i class="ri-${amenity.icon}-line"></i> ${amenity.name}</h4>
+                            <p><strong>Category:</strong> ${amenity.type}</p>
+                            <p><strong>Distance:</strong> ~${(Math.random() * 3 + 0.5).toFixed(1)} km</p>
+                        </div>
+                    `);
+            });
+        }
+
+        // Image upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewGrid = document.getElementById('previewGrid');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        uploadedFiles.push({ file, preview: e.target.result });
+                        renderPreviews();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function renderPreviews() {
+            previewGrid.innerHTML = uploadedFiles.map((item, index) => `
+                <div class="preview-item">
+                    <img src="${item.preview}" alt="Preview ${index + 1}">
+                    <button onclick="removeImage(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function removeImage(index) {
+            uploadedFiles.splice(index, 1);
+            renderPreviews();
+        }
+
+        // Navigation
+        function nextStep(step) {
+            // Validation
+            if (currentStep === 1) {
+                const required = ['propertyType', 'neighborhood', 'area', 'bedrooms', 'bathrooms', 'propertyAge', 'streetWidth'];
+                const allFilled = required.every(id => {
+                    const el = document.getElementById(id);
+                    return el && el.value.trim() !== "";
+                });
+                if (!allFilled) {
+                    alert('Please fill in all property details (Property Type, Neighborhood, Area, Bedrooms, Bathrooms, Age, and Street Width) before proceeding.');
+                    return;
+                }
+            }
+
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            const stepTab = document.querySelector(`[data-step="${currentStep}"]`);
+            if (stepTab) {
+                stepTab.classList.remove('active');
+                stepTab.classList.add('completed');
+            }
+
+            currentStep = step;
+            document.getElementById(`step${step}`).classList.add('active');
+            const nextStepTab = document.querySelector(`[data-step="${step}"]`);
+            if (nextStepTab) nextStepTab.classList.add('active');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (step === 3 && !map) {
+                setTimeout(initMap, 100);
+            }
+        }
+
+        function prevStep(step) {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            const stepTab = document.querySelector(`[data-step="${currentStep}"]`);
+            if (stepTab) stepTab.classList.remove('active');
+
+            currentStep = step;
+            document.getElementById(`step${step}`).classList.add('active');
+            const prevStepTab = document.querySelector(`[data-step="${step}"]`);
+            if (prevStepTab) {
+                prevStepTab.classList.add('active');
+                prevStepTab.classList.remove('completed');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Timer-driven animated checklist stepper
+        function runChecklistAnimation() {
+            return new Promise((resolve) => {
+                const steps = [
+                    { id: 'chkStep1', text: 'أرشفة وتحليل موقع العقار الجغرافي' },
+                    { id: 'chkStep2', text: 'استعلام الصفقات المقارنة القريبة من قاعدة البيانات' },
+                    { id: 'chkStep3', text: 'حساب المسافات الجغرافية لمركز المدينة وعوامل التقييم' },
+                    { id: 'chkStep4', text: 'تشغيل نموذج الذكاء الاصطناعي (XGBoost) وإصدار التقرير' }
+                ];
+
+                // Reset all steps to initial state
+                steps.forEach(step => {
+                    const el = document.getElementById(step.id);
+                    if (el) {
+                        el.className = 'checklist-item';
+                        el.querySelector('i').className = 'ri-checkbox-blank-circle-line';
+                        el.style.color = 'var(--text-color-light)';
+                    }
+                });
+
+                let currentIdx = 0;
+
+                function nextCheck() {
+                    if (currentIdx > 0) {
+                        // Mark previous as completed
+                        const prevStep = steps[currentIdx - 1];
+                        const prevEl = document.getElementById(prevStep.id);
+                        if (prevEl) {
+                            prevEl.className = 'checklist-item completed';
+                            prevEl.querySelector('i').className = 'ri-checkbox-circle-fill';
+                            prevEl.style.color = 'var(--second-color)';
+                        }
+                    }
+
+                    if (currentIdx < steps.length) {
+                        // Mark current as active (spinning loader)
+                        const currentStep = steps[currentIdx];
+                        const curEl = document.getElementById(currentStep.id);
+                        if (curEl) {
+                            curEl.className = 'checklist-item active';
+                            curEl.querySelector('i').className = 'ri-loader-4-line spin';
+                            curEl.style.color = 'var(--first-color)';
+                        }
+                        currentIdx++;
+                        setTimeout(nextCheck, 600); // 600ms per step
+                    } else {
+                        // All steps finished
+                        resolve();
+                    }
+                }
+
+                nextCheck();
+            });
+        }
+
+        // Generate Report (Fetch API from backend)
+        async function generateReport() {
+            // Setup step transitions
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            const stepTab = document.querySelector(`[data-step="${currentStep}"]`);
+            if (stepTab) stepTab.classList.add('completed');
+            const targetStepTab = document.querySelector(`[data-step="4"]`);
+            if (targetStepTab) targetStepTab.classList.add('active');
+            document.getElementById('step4').classList.add('active');
+            
+            const loadingEl = document.getElementById('loadingState');
+            const reportContentEl = document.getElementById('reportContent');
+            const errorEl = document.getElementById('errorMessage');
+            
+            loadingEl.style.display = 'flex';
+            reportContentEl.style.display = 'none';
+            errorEl.style.display = 'none';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Gather form data
+            const payload = {
+                city: document.getElementById('city').value,
+                district: document.getElementById('neighborhood').value,
+                area: parseFloat(document.getElementById('area').value),
+                bedrooms: parseInt(document.getElementById('bedrooms').value),
+                bathrooms: parseInt(document.getElementById('bathrooms').value),
+                property_age: parseFloat(document.getElementById('propertyAge').value),
+                street_width: parseFloat(document.getElementById('streetWidth').value),
+                property_type: document.getElementById('propertyType').value,
+                latitude: selectedLocation.lat,
+                longitude: selectedLocation.lng,
+                elevator: document.getElementById('elevator').checked,
+                ac: document.getElementById('ac').checked,
+                furnished: document.getElementById('furnished').checked,
+                pool: document.getElementById('pool').checked,
+                car_entrance: document.getElementById('car_entrance').checked,
+                basement: document.getElementById('basement').checked,
+                yard: document.getElementById('yard').checked,
+                livings: parseInt(document.getElementById('livings').value || "1"),
+                floor_number: 0,
+                ketchen: true
+            };
+
+            console.log("Sending valuation payload to ASP.NET Core:", payload);
+
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            const token = localStorage.getItem('token');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            let apiError = null;
+            let apiResponseData = null;
+
+            // Trigger prediction fetch request
+            const apiPromise = (async () => {
+                try {
+                    const response = await fetch('http://localhost:5000/api/predict', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errBody = await response.json();
+                        const errMsg = errBody.detail ? (typeof errBody.detail === 'string' ? errBody.detail : JSON.stringify(errBody.detail)) : 'API Valuation call failed';
+                        throw new Error(errMsg);
+                    }
+
+                    apiResponseData = await response.json();
+                } catch (err) {
+                    apiError = err;
+                }
+            })();
+
+            // Run checklist animation and API call in parallel
+            await Promise.all([runChecklistAnimation(), apiPromise]);
+
+            if (apiError) {
+                console.error("Valuation process failed:", apiError);
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+                errorEl.querySelector('.error-text').textContent = apiError.message || 'Connection to the ASP.NET Core gateway failed. Make sure the API is online.';
+                return;
+            }
+
+            try {
+                console.log("Prediction response received:", apiResponseData);
+                apiData = standardizeApiData(apiResponseData);
+
+                // Render dynamic details inside the UI
+                document.getElementById('estimatedPrice').textContent = `SAR ${Math.round(apiData.predicted_price).toLocaleString()}`;
+                document.getElementById('reportPropertyType').textContent = payload.property_type;
+                document.getElementById('reportArea').textContent = `${payload.area.toLocaleString()} sqm`;
+                
+                // Count how many facilities are checked
+                const checkedAmenities = [];
+                if (payload.elevator) checkedAmenities.push("Elevator");
+                if (payload.ac) checkedAmenities.push("AC");
+                if (payload.furnished) checkedAmenities.push("Furnished");
+                if (payload.pool) checkedAmenities.push("Pool");
+                if (payload.car_entrance) checkedAmenities.push("Car Entrance");
+                if (payload.basement) checkedAmenities.push("Basement");
+                if (payload.yard) checkedAmenities.push("Yard");
+                
+                document.getElementById('reportFacilities').textContent = `${checkedAmenities.length} active (${checkedAmenities.join(', ') || 'none'})`;
+                document.getElementById('reportStreetView').textContent = `${payload.street_width} m width`;
+                document.getElementById('reportNeighborhood').textContent = payload.district;
+                
+                const sqmPrice = Math.round(apiData.predicted_price / payload.area);
+                document.getElementById('pricePerSqm').textContent = `SAR ${sqmPrice.toLocaleString()}`;
+                
+                // Update dynamic statistics card from backend response
+                document.getElementById('confidenceScore').textContent = `${apiData.confidence_score}%`;
+                document.getElementById('valuationRange').textContent = `SAR ${Math.round(apiData.min_price).toLocaleString()} - SAR ${Math.round(apiData.max_price).toLocaleString()}`;
+                document.getElementById('valuationExplanation').textContent = apiData.explanation;
+
+                // Hide loading, show content
+                loadingEl.style.display = 'none';
+                reportContentEl.style.display = 'block';
+                currentStep = 4;
+
+                // Initialize report Leaflet map
+                setTimeout(() => {
+                    initReportMap();
+                }, 500);
+
+            } catch (error) {
+                console.error("Valuation response parsing failed:", error);
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+                errorEl.querySelector('.error-text').textContent = error.message || 'Error processing response from valuation API.';
+            }
+        }
+
+        // Generate Premium Certified PDF report
+        async function downloadReport() {
+            if (!apiData) {
+                alert('No report data available to download. Please run the prediction first.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Colors
+            const primaryColor = [89, 31, 116]; 
+            const secondaryColor = [76, 100, 73]; 
+            const lightGray = [248, 249, 250];
+            const darkGray = [51, 51, 51];
+
+            // Load QR code image dynamically from Public QR API
+            let qrImgData = null;
+            try {
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('http://localhost:3000/service3.html?cachedId=' + (apiData.id || ''))}`;
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = reject;
+                    img.src = qrUrl;
+                });
+                qrImgData = img;
+            } catch (e) {
+                console.error("Could not load QR code image:", e);
+            }
+
+            // Form inputs
+            const propertyType = document.getElementById('reportPropertyType').textContent;
+            const area = document.getElementById('reportArea').textContent;
+            const price = document.getElementById('estimatedPrice').textContent;
+            const facilities = document.getElementById('reportFacilities').textContent;
+            const streetView = document.getElementById('reportStreetView').textContent;
+            const neighborhood = document.getElementById('reportNeighborhood').textContent;
+            const pricePerSqm = document.getElementById('pricePerSqm').textContent;
+
+            let yPos = 20;
+
+            // Page 1 Header
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, 210, 45, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(28);
+            doc.setFont('helvetica', 'bold');
+            doc.text('AQAAR METER', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Smart AI Property Valuation Report', 105, 30, { align: 'center' });
+
+            yPos = 55;
+
+            // Price box
+            doc.setFillColor(...lightGray);
+            doc.roundedRect(20, yPos, 170, 25, 3, 3, 'F');
+            
+            doc.setTextColor(...primaryColor);
+            doc.setFontSize(24);
+            doc.setFont('helvetica', 'bold');
+            doc.text(price, 105, yPos + 12, { align: 'center' });
+            
+            doc.setTextColor(...darkGray);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Estimated Fair Market Value (XGBoost Prediction)', 105, yPos + 20, { align: 'center' });
+
+            // Certified Valuation Stamp (Concentric circles and text)
+            doc.setDrawColor(...secondaryColor);
+            doc.setLineWidth(1);
+            doc.ellipse(170, yPos + 12.5, 11, 11);
+            doc.ellipse(170, yPos + 12.5, 9.5, 9.5);
+            doc.setTextColor(...secondaryColor);
+            doc.setFontSize(5.5);
+            doc.setFont('helvetica', 'bold');
+            doc.text('AQAAR METER', 170, yPos + 9.5, { align: 'center' });
+            doc.text('CERTIFIED', 170, yPos + 13, { align: 'center' });
+            doc.text('VALUATION', 170, yPos + 16, { align: 'center' });
+
+            yPos += 35;
+
+            // Section: Summary
+            doc.setFillColor(...primaryColor);
+            doc.rect(20, yPos, 170, 8, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('PROPERTY SUMMARY', 25, yPos + 5.5);
+
+            yPos += 15;
+            doc.setTextColor(...darkGray);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+
+            // Translate neighborhood to English for PDF formatting
+            const neighborhoodEn = getEnglishDistrictName(neighborhood);
+
+            const propertyData = [
+                ['Property Type:', propertyType],
+                ['Total Area:', area],
+                ['Neighborhood:', neighborhoodEn],
+                ['Street Width:', streetView]
+            ];
+
+            propertyData.forEach(([label, value]) => {
+                doc.setFont('helvetica', 'bold');
+                doc.text(label, 25, yPos);
+                doc.setFont('helvetica', 'normal');
+                doc.text(value, 90, yPos);
+                yPos += 7;
+            });
+
+            yPos += 5;
+
+            // Section: Market Analysis
+            doc.setFillColor(...secondaryColor);
+            doc.rect(20, yPos, 170, 8, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('MARKET ANALYSIS', 25, yPos + 5.5);
+
+            yPos += 15;
+            doc.setTextColor(...darkGray);
+
+            const marketData = [
+                ['Price per sqm:', pricePerSqm],
+                ['Valuation Range:', `SAR ${Math.round(apiData.min_price).toLocaleString()} - SAR ${Math.round(apiData.max_price).toLocaleString()}`],
+                ['Confidence Score:', `${apiData.confidence_score}%`],
+                ['Market Trend:', 'Growing (Stable)'],
+                ['Valuation Engine:', 'XGBoost Regressor (V2)']
+            ];
+
+            marketData.forEach(([label, value]) => {
+                doc.setFont('helvetica', 'bold');
+                doc.text(label, 25, yPos);
+                doc.setFont('helvetica', 'normal');
+                doc.text(value, 90, yPos);
+                yPos += 7;
+            });
+
+            // New page for spatial analysis
+            doc.addPage();
+            yPos = 20;
+
+            doc.setFillColor(...secondaryColor);
+            doc.rect(20, yPos, 170, 8, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('SPATIAL ANALYSIS & COORDINATES', 25, yPos + 5.5);
+
+            yPos += 15;
+            doc.setTextColor(...darkGray);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Property Geolocation:', 25, yPos);
+            doc.text(`Latitude: ${selectedLocation.lat.toFixed(6)}, Longitude: ${selectedLocation.lng.toFixed(6)}`, 25, yPos + 7);
+            
+            yPos += 20;
+
+            // Nearby items
+            const amenities = [
+                ['Shopping Centers', `${apiData.used_features.distance_to_center_km.toFixed(1)} km to center`, 'Excellent Access'],
+                ['Healthcare & General Amenities', 'Nearby services active', 'Good Accessibility'],
+                ['Infrastructure Rating', `${apiData.used_features.infra_score_out_of_3}/3 facilities score`, 'High Quality'],
+                ['Luxury Feature Rating', `${apiData.used_features.luxury_score_out_of_4}/4 features score`, 'Premium Fitted']
+            ];
+
+            amenities.forEach(([name, distance, status]) => {
+                doc.setDrawColor(...primaryColor);
+                doc.setLineWidth(0.5);
+                doc.roundedRect(20, yPos, 170, 12, 2, 2);
+                
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(10);
+                doc.text(name, 25, yPos + 5);
+                
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.text(distance, 25, yPos + 9);
+                
+                doc.setTextColor(...secondaryColor);
+                doc.setFontSize(8);
+                doc.text(status, 160, yPos + 7, { align: 'right' });
+                
+                doc.setTextColor(...darkGray);
+                yPos += 15;
+            });
+
+            // CMA Table in PDF
+            yPos += 5;
+            doc.setFillColor(...primaryColor);
+            doc.rect(20, yPos, 170, 8, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('COMPARABLE MARKET TRANSACTIONS (CMA)', 25, yPos + 5.5);
+
+            yPos += 15;
+            
+            doc.setFillColor(240, 240, 240);
+            doc.rect(20, yPos, 170, 8, 'F');
+            doc.setTextColor(...darkGray);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.text('District', 22, yPos + 5.5);
+            doc.text('Distance', 65, yPos + 5.5);
+            doc.text('Area', 95, yPos + 5.5);
+            doc.text('Price/sqm', 125, yPos + 5.5);
+            doc.text('Total Price', 160, yPos + 5.5);
+
+            yPos += 8;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            
+            if (closestSales && closestSales.length > 0) {
+                closestSales.forEach((sale, index) => {
+                    doc.setDrawColor(220, 220, 220);
+                    doc.setLineWidth(0.5);
+                    doc.line(20, yPos + 8, 190, yPos + 8);
+
+                    if (index % 2 === 1) {
+                        doc.setFillColor(248, 249, 250);
+                        doc.rect(20, yPos, 170, 8, 'F');
+                    }
+
+                    doc.setTextColor(...darkGray);
+                    const distEn = getEnglishDistrictName(sale.district);
+                    doc.text(distEn, 22, yPos + 5.5);
+                    doc.text(`${sale.distance_km} km`, 65, yPos + 5.5);
+                    doc.text(`${sale.area} sqm`, 95, yPos + 5.5);
+                    doc.text(`SAR ${Math.round(sale.price_per_sqm).toLocaleString()}`, 125, yPos + 5.5);
+                    doc.text(`SAR ${Math.round(sale.price).toLocaleString()}`, 160, yPos + 5.5);
+
+                    yPos += 8;
+                });
+            } else {
+                doc.text('No comparable transactions found in this radius.', 25, yPos + 5.5);
+                yPos += 8;
+            }
+
+            // QR Code Verification Block
+            yPos += 10;
+            doc.setDrawColor(...primaryColor);
+            doc.setLineWidth(0.5);
+            doc.roundedRect(20, yPos, 170, 32, 2, 2);
+            
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.text('REPORT VERIFICATION & DIGITAL RECORD', 25, yPos + 8);
+            
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text('This PDF contains an official certified valuation record from AqaarMeter.', 25, yPos + 14);
+            doc.text('Scan the QR code to access the secure live dashboard, review nearby market', 25, yPos + 18);
+            doc.text('trends, download the original receipts, and check active records.', 25, yPos + 22);
+            
+            if (qrImgData) {
+                doc.addImage(qrImgData, 'PNG', 155, yPos + 3, 26, 26);
+            }
+
+            // Footer
+            yPos = 270;
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, yPos, 190, yPos);
+            yPos += 7;
+            
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.setFont('helvetica', 'italic');
+            doc.text(`Report Generated: ${new Date().toLocaleString()}`, 105, yPos, { align: 'center' });
+            yPos += 5;
+            doc.text('Valuation predictions are generated using data-driven algorithms based on Aseer and Riyadh region sales.', 105, yPos, { align: 'center' });
+
+            doc.save(`Aqaar_Meter_Valuation_Report_${Date.now()}.pdf`);
+            alert('PDF valuation report generated successfully!');
+        }
+
+        // On window load checks
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Check login state to adjust nav bar
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+            if (token && username) {
+                document.getElementById('loginNavLink').style.display = 'none';
+                
+                const dashLink = document.getElementById('dashboardNavLink');
+                dashLink.style.display = 'inline-flex';
+                dashLink.innerHTML = `<i class="ri-dashboard-line"></i> لوحة التحكم (${username})`;
+            }
+
+            // Check if we should load a cached valuation
+            const urlParams = new URLSearchParams(window.location.search);
+            const cachedId = urlParams.get('cachedId');
+            if (cachedId) {
+                try {
+                    // Show loading
+                    document.getElementById('step1').style.display = 'none';
+                    document.querySelector('.progress-section').style.display = 'none';
+                    const loadingEl = document.getElementById('loadingState');
+                    loadingEl.style.display = 'flex';
+                    loadingEl.querySelector('.loading-title').textContent = 'جاري استرجاع تقرير التقييم المؤرشف...';
+
+                    // Fetch history logs
+                    const response = await fetch('http://localhost:5000/api/predict/history?limit=100', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to load cached report');
+                    const history = await response.json();
+                    
+                    // Find matching log
+                    const log = history.find(x => x.id == parseInt(cachedId));
+                    if (!log) throw new Error('Valuation report not found in history');
+
+                    // Set up selected location
+                    selectedLocation = { lat: log.latitude, lng: log.longitude };
+                    
+                    // Standardize and store apiData
+                    apiData = standardizeApiData(log);
+
+                    // Populate form inputs for consistency
+                    document.getElementById('propertyType').value = log.propertyType;
+                    document.getElementById('area').value = log.area;
+                    document.getElementById('bedrooms').value = log.bedrooms;
+                    document.getElementById('bathrooms').value = log.bathrooms;
+                    document.getElementById('livings').value = log.livings;
+                    document.getElementById('propertyAge').value = log.propertyAge;
+                    document.getElementById('streetWidth').value = log.streetWidth;
+                    document.getElementById('neighborhood').value = log.district;
+
+                    document.getElementById('elevator').checked = log.elevator;
+                    document.getElementById('ac').checked = log.ac;
+                    document.getElementById('furnished').checked = log.furnished;
+                    document.getElementById('pool').checked = log.pool;
+                    document.getElementById('car_entrance').checked = log.carEntrance;
+                    document.getElementById('basement').checked = log.basement;
+                    document.getElementById('yard').checked = log.yard;
+
+                    // Populate UI elements
+                    document.getElementById('estimatedPrice').textContent = `SAR ${Math.round(apiData.predicted_price).toLocaleString()}`;
+                    document.getElementById('reportPropertyType').textContent = log.propertyType;
+                    document.getElementById('reportArea').textContent = `${log.area.toLocaleString()} sqm`;
+                    
+                    // Reconstruct checked amenities list
+                    const checkedAmenities = [];
+                    if (log.elevator) checkedAmenities.push("Elevator");
+                    if (log.ac) checkedAmenities.push("AC");
+                    if (log.furnished) checkedAmenities.push("Furnished");
+                    if (log.pool) checkedAmenities.push("Pool");
+                    if (log.carEntrance) checkedAmenities.push("Car Entrance");
+                    if (log.basement) checkedAmenities.push("Basement");
+                    if (log.yard) checkedAmenities.push("Yard");
+                    
+                    document.getElementById('reportFacilities').textContent = `${checkedAmenities.length} active (${checkedAmenities.join(', ') || 'none'})`;
+                    document.getElementById('reportStreetView').textContent = `${log.streetWidth} m width`;
+                    document.getElementById('reportNeighborhood').textContent = log.district;
+                    
+                    const sqmPrice = Math.round(apiData.predicted_price / log.area);
+                    document.getElementById('pricePerSqm').textContent = `SAR ${sqmPrice.toLocaleString()}`;
+                    
+                    document.getElementById('confidenceScore').textContent = `${apiData.confidence_score}%`;
+                    document.getElementById('valuationRange').textContent = `SAR ${Math.round(apiData.min_price).toLocaleString()} - SAR ${Math.round(apiData.max_price).toLocaleString()}`;
+                    document.getElementById('valuationExplanation').textContent = apiData.explanation;
+
+                    // Load report Leaflet map
+                    setTimeout(() => {
+                        initReportMap();
+                        loadingEl.style.display = 'none';
+                        document.getElementById('reportContent').style.display = 'block';
+                    }, 800);
+
+                } catch (e) {
+                    console.error(e);
+                    alert('عذراً، لم نتمكن من العثور على التقرير المطلوب أو انتهت صلاحية الجلسة.');
+                    window.location.href = 'dashboard.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "city": "Abha",
+  "district": "حي المنسك",
+  "area": 450.0,
+  "bedrooms": 5,
+  "bathrooms": 4,
+  "property_age": 3.0,
+  "street_width": 15.0,
+  "property_type": "Villa",
+  "latitude": 18.2465,
+  "longitude": 42.5117,
+  "elevator": true,
+  "ac": true,
+  "furnished": true,
+  "pool": true,
+  "car_entrance": true,
+  "basement": true,
+  "yard": true,
+  "livings": 2,
+  "floor_number": 0,
+  "ketchen": true
+}

@@ -1,0 +1,6 @@
+@AqaarMeterAPI_HostAddress = http://localhost:5299
+
+GET {{AqaarMeterAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

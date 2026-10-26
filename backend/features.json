@@ -1,0 +1,1 @@
+{"num_features": ["area", "beds", "livings", "wc", "street_width", "age", "location.lat", "location.lng", "distance_to_center", "space_per_room", "bathroom_ratio", "luxury_score", "total_rooms", "floor number", "infra_score", "ketchen"], "cat_features": ["district", "category_text"]}

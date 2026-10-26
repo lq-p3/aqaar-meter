@@ -1,0 +1,20 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# .NET
+bin/
+obj/
+*.user
+
+# Local data / databases
+*.db
+*.db-shm
+*.db-wal
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

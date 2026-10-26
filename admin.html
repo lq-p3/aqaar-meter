@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإدارة - عقار ميتر</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicons.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap");
+
+        :root {
+            --first-color: #591f74;
+            --second-color: #4c6449;
+            --first-gradient: linear-gradient(135deg, #591f74 0%, #7d2a9e 50%, #4c6449 100%);
+            --dark-gradient: linear-gradient(135deg, #120716 0%, #1e0f24 100%);
+            --card-bg: rgba(30, 15, 36, 0.45);
+            --card-border: rgba(125, 42, 158, 0.15);
+            --text-color: #f8f9fa;
+            --text-muted: #c3b8cb;
+            --body-font: "Arimo", sans-serif;
+            --danger-color: #ef4444;
+            --success-color: #2ec4b6;
+        }
+
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            font-family: var(--body-font);
+            background: var(--dark-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        header {
+            background: rgba(18, 7, 22, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(125, 42, 158, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo i {
+            background: var(--first-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: var(--body-font);
+        }
+
+        .btn-action:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-dashboard {
+            background: var(--first-gradient);
+            border: none;
+            box-shadow: 0 4px 10px rgba(89, 31, 116, 0.3);
+        }
+
+        .btn-dashboard:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(89, 31, 116, 0.45);
+        }
+
+        .admin-wrapper {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .section-title {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-info h3 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: rgba(125, 42, 158, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #c457f5;
+        }
+
+        /* Layout Columns */
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .panel-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .panel-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        /* Table */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+        }
+
+        th {
+            padding: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .badge-role {
+            padding: 0.25rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-admin {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ff8787;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .badge-agent {
+            background: rgba(76, 100, 73, 0.2);
+            color: #92e08a;
+            border: 1px solid rgba(76, 100, 73, 0.3);
+        }
+
+        .badge-user {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ffa1a1;
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: var(--body-font);
+            transition: all 0.3s;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-color);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        select.role-select {
+            background: #1e0f24;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 0.35rem 0.5rem;
+            border-radius: 8px;
+            font-family: var(--body-font);
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <a href="service3.html" class="logo">
+                <i class="ri-home-gear-line"></i>
+                <span>عقار ميتر (الإدارة)</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="dashboard.html" class="btn-action btn-dashboard">
+                    <i class="ri-dashboard-3-line"></i>
+                    <span>لوحة التحكم الشخصية</span>
+                </a>
+                <a href="service3.html" class="btn-action">تقييم عقار</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-wrapper">
+        <div class="section-title">
+            <h1>إحصائيات النظام العامة</h1>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>إجمالي المستخدمين المسجلين</h3>
+                    <div class="stat-value" id="statUsers">0</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="ri-user-group-line"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>عمليات التقييم المنجزة</h3>
+                    <div class="stat-value" id="statValuations">0</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="ri-file-chart-line"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>قاعدة صفقات المقارنة</h3>
+                    <div class="stat-value" id="statTransactions">0</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="ri-database-line"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>الحي الأكثر بحثاً وتقييماً</h3>
+                    <div class="stat-value" id="statActiveDistrict" style="font-size: 1.15rem; font-weight: 600;">تحميل...</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="ri-map-pin-2-line"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-layout">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h2>إدارة شؤون الأعضاء والمستخدمين</h2>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>مستمع/اسم المستخدم</th>
+                                <th>البريد الإلكتروني</th>
+                                <th>الصلاحية الحالية</th>
+                                <th>تاريخ الانضمام</th>
+                                <th>تحديث الصلاحية</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authorization (Must be logged in and role must be Admin)
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+
+        if (!token || role !== 'Admin') {
+            window.location.href = 'dashboard.html';
+        }
+
+        async function loadAdminStats() {
+            try {
+                const response = await fetch('http://localhost:5000/api/analytics/admin-stats', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('فشل جلب بيانات لوحة الإدارة');
+                }
+
+                const data = await response.json();
+                console.log("Admin statistics:", data);
+
+                // Update cards
+                document.getElementById('statUsers').textContent = data.totalUsers;
+                document.getElementById('statValuations').textContent = data.totalValuations;
+                document.getElementById('statTransactions').textContent = data.totalMarketTransactions.toLocaleString();
+                document.getElementById('statActiveDistrict').textContent = data.mostActiveDistrict;
+
+                // Populate users list
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '';
+
+                data.users.forEach(user => {
+                    const date = new Date(user.createdAt).toLocaleDateString('ar-SA');
+                    
+                    let roleBadgeClass = 'badge-user';
+                    let roleAr = 'مستخدم';
+                    if (user.role === 'Admin') {
+                        roleBadgeClass = 'badge-admin';
+                        roleAr = 'مدير';
+                    } else if (user.role === 'Agent') {
+                        roleBadgeClass = 'badge-agent';
+                        roleAr = 'مقيم معتمد';
+                    }
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="font-weight: 600; color: #fff;">${user.username}</td>
+                        <td>${user.email}</td>
+                        <td><span class="badge-role ${roleBadgeClass}">${roleAr}</span></td>
+                        <td>${date}</td>
+                        <td>
+                            <select class="role-select" onchange="changeUserRole(${user.id}, this.value)">
+                                <option value="User" ${user.role === 'User' ? 'selected' : ''}>مستخدم عادي</option>
+                                <option value="Agent" ${user.role === 'Agent' ? 'selected' : ''}>مقيم معتمد</option>
+                                <option value="Admin" ${user.role === 'Admin' ? 'selected' : ''}>مدير النظام</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button onclick="deleteUser(${user.id}, '${user.username}')" class="btn-danger">حذف الحساب</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function changeUserRole(userId, newRole) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/analytics/users/${userId}/role`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ role: newRole })
+                });
+
+                if (!response.ok) {
+                    throw new Error('فشل تعديل الصلاحية');
+                }
+
+                alert('تم تحديث صلاحية المستخدم بنجاح.');
+                loadAdminStats();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        async function deleteUser(userId, username) {
+            if (!confirm(`هل أنت متأكد من رغبتك في حذف حساب المستخدم "${username}" نهائياً؟`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/analytics/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('فشل حذف المستخدم');
+                }
+
+                alert('تم حذف حساب المستخدم بنجاح.');
+                loadAdminStats();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        window.onload = loadAdminStats;
+    </script>
+</body>
+</html>
